@@ -6,6 +6,9 @@ export GITHOME=$HOME/Documents/Dropbox/GIT
 export SPLASH_SCREEN=$HOME/.splash
 export PATH=$LOCALBIN:/usr/local/bin:$PATH
 
+# Set emacs as my default system editor
+export EDITOR=emacs
+
 # Load RVM
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
 
