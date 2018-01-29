@@ -1,0 +1,10 @@
+[user]
+	name = Michael Bond
+	email = MichaelRBond@users.noreply.github.com
+[mergetool]
+	keepBackup = true
+[core]
+	excludesfile = /Users/mrbond/.gitignore_global
+[push]
+	default = simple
+	

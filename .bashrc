@@ -5,11 +5,13 @@ if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+files=($HOME/.splashes/*)
+
 export LOCALBIN=$HOME/bin
-export GITHOME=$HOME/Documents/GIT
-export SPLASH_SCREEN=$HOME/.splash
-export PATH=$HOME/tmp:$LOCALBIN:/usr/local/bin:$PATH
-export GOPATH=$Home/Documents/gocode
+export GITHOME=$HOME/Dropbox/GIT
+export SPLASH_SCREEN="${files[RANDOM % ${#files[@]}]}"
+export GOPATH=$HOME/Dropbox/GIT/go/
+export PATH=$HOME/tmp:$LOCALBIN:/usr/local/bin:/usr/local/go/bin:$GOPATH/bin:$PATH
 
 # Set emacs as my default system editor
 export EDITOR=emacs
@@ -80,7 +82,6 @@ export -f cdgit
 # Splash Screen
 
 cat $SPLASH_SCREEN
-echo
 
 ###############################################################################
 # Prompt
@@ -181,3 +182,13 @@ complete -F _autoComplete_cdgit cdgit
 if [ -f $LOCALBIN/bash_completion ]; then
      . $LOCALBIN/bash_completion
 fi
+
+# tabtab source for serverless package
+# uninstall by removing these lines or running `tabtab uninstall serverless`
+[ -f /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/serverless.bash ] && . /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/serverless.bash
+# tabtab source for sls package
+# uninstall by removing these lines or running `tabtab uninstall sls`
+[ -f /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/sls.bash ] && . /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/sls.bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
