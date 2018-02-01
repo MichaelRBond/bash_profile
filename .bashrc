@@ -10,44 +10,44 @@ files=($HOME/.splashes/*)
 export LOCALBIN=$HOME/bin
 export GITHOME=$HOME/Dropbox/GIT
 export SPLASH_SCREEN="${files[RANDOM % ${#files[@]}]}"
-export GOPATH=$HOME/Dropbox/GIT/go/
+export GOPATH=$GITHOME/go/
 export PATH=$HOME/tmp:$LOCALBIN:/usr/local/bin:/usr/local/go/bin:$GOPATH/bin:$PATH
 
-# Set emacs as my default system editor
+# Set emacs as default system editor
 export EDITOR=emacs
-
-# Load RVM
-# [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-
 
 ###############################################################################
 # Aliases
 
-alias resetScreen='xrandr -s 0 --dpi 192XSX'
-
-# use htop instead of top
-alias top='htop'
-
-# Remove cache files to speed up terminal
-alias cleanup='sudo rm -f /private/var/log/asl/*.asl'
-
 # Add color to ls command
 alias ls='ls --color'
 
-# Display a directory tree
-alias tree="find . -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'"
+case $OSTYPE in
+  linux*)
+    # Reset HiDPI settings
+    alias resetScreen='xrandr -s 0 --dpi 192XSX'
 
-# Flush the DNS cache / reload /etc/hosts
-alias flushDNS='dscacheutil -flushcache'
+    # use htop instead of top
+    alias top='htop'
+    
+    # Load tmux with linux config
+    alias tmux="tmux -f ~/.tmux/configs/tmux.linux.conf"
+    ;;
+  darwin*)
+    # Flush the DNS cache / reload /etc/hosts
+    alias flushDNS='dscacheutil -flushcache'
 
-# source code highligher
-alias highlight="highlight -O rtf -t 4 -K 12 -k 'Monaco' $1"
+    # Remove cache files to speed up terminal
+    alias cleanup='sudo rm -f /private/var/log/asl/*.asl'
 
-# Filemerge tool
-alias filemerge="open /Applications/Xcode.app/Contents/Applications/FileMerge.app/"
+    # Filemerge tool
+    alias filemerge="open /Applications/Xcode.app/Contents/Applications/FileMerge.app/"
 
-# Change into the notes directory ... this should be a bash completion script
-alias cdnotes="cd /home/mrbond/Dropbox/Notes"
+    # Load tmux with Mac config
+    alias tmux="tmux -f ~/.tmux/configs/tmux.mac.conf"
+    ;;
+  *) ;;
+esac
 
 # emacs
 if [ -f /Applications/Emacs.app/Contents/MacOS/Emacs ]
@@ -55,14 +55,6 @@ then
     alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs --no-splash"
 else
     alias emacs="emacs --no-splash -nw"
-fi
-
-# emacsclient
-if [ -f /Applications/Emacs.app/Contents/MacOS/bin/emacsclient ]
-then
-    alias ec="/Applications/Emacs.app/Contents/MacOS/bin/emacsclient"
-else
-    alias ec="emacsclient"
 fi
 
 #change into my base Git repo directory, or into a specific project directory
@@ -183,12 +175,6 @@ if [ -f $LOCALBIN/bash_completion ]; then
      . $LOCALBIN/bash_completion
 fi
 
-# tabtab source for serverless package
-# uninstall by removing these lines or running `tabtab uninstall serverless`
-[ -f /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/serverless.bash ] && . /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/serverless.bash
-# tabtab source for sls package
-# uninstall by removing these lines or running `tabtab uninstall sls`
-[ -f /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/sls.bash ] && . /home/mrbond/Documents/Move/GIT/trebuchet/node_modules/tabtab/.completions/sls.bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
