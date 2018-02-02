@@ -25,11 +25,13 @@ export EDITOR=emacs
 ###############################################################################
 # Aliases
 
-# Add color to ls command
-alias ls='ls --color'
+# Silver Searcher searches hidden files
+alias ag='ag --hidden'
 
 case $OSTYPE in
   linux*)
+    alias ls='ls --color'
+
     # Reset HiDPI settings
     alias resetScreen='xrandr -s 0 --dpi 192XSX'
 
@@ -40,6 +42,8 @@ case $OSTYPE in
     alias tmux="tmux -f ~/.tmux/configs/tmux.linux.conf"
     ;;
   darwin*)
+    alias ls='ls -G'
+
     # Flush the DNS cache / reload /etc/hosts
     alias flushDNS='dscacheutil -flushcache'
 
@@ -67,12 +71,16 @@ fi
 function cdgit {
 
     if [ ! -n "$1" ]
-		then
-			cd $GITHOME
-		else
+    then
+	    cd $GITHOME
+    else
     	cd $GITHOME/$1
     fi
 
+    if [ -f ".nvmrc" ]
+    then
+	    nvm use
+    fi
 }
 export -f cdgit
 
@@ -184,6 +192,10 @@ fi
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+if [ -f "$HOME/.local_profile" ]; then
+  source "$HOME/.local_profile"
+fi
 
 if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]]; then
   tmux
