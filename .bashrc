@@ -54,7 +54,7 @@ case $OSTYPE in
     alias filemerge="open /Applications/Xcode.app/Contents/Applications/FileMerge.app/"
 
     # Load tmux with Mac config
-    alias tmux="tmux -f ~/.tmux/configs/tmux.mac.conf"
+    alias tmux="tmux -f ~/.tmux/configs/tmux.macos.conf"
     ;;
   *) ;;
 esac
