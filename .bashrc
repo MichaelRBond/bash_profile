@@ -121,7 +121,12 @@ if [[ -z $gitBranch ]]; then
   gitBranch=$(date +%H:%M);
   GITCOLOR=$CYAN;
 else
-	GITCOLOR=$YELLOW;
+  GITCOLOR=$YELLOW;
+fi
+
+gitDirty=$(git status --porcelain)
+if [[ -n $gitDirty ]]; then
+  GITCOLOR=$RED;
 fi
 
 let pwdsize=$(echo -n ${newPWD} | wc -c | tr -d " ")
