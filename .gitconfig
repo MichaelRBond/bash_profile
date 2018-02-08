@@ -5,6 +5,7 @@
 	keepBackup = true
 [core]
 	excludesfile = /Users/mrbond/.gitignore_global
+	editor = emacs -nw
 [push]
 	default = simple
 	
