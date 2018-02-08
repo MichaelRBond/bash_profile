@@ -124,7 +124,7 @@ else
   GITCOLOR=$YELLOW;
 fi
 
-gitDirty=$(git status --porcelain)
+gitDirty=$(git status --porcelain 2> /dev/null)
 if [[ -n $gitDirty ]]; then
   GITCOLOR=$RED;
 fi
