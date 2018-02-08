@@ -114,7 +114,7 @@ usernam=$(whoami)
 let usersize=$(echo -n $usernam | wc -c | tr -d " ")
 
 newPWD="${PWD}"
-newPWD="$(echo -n ${PWD} | sed -e "s/\/Users\/mbond/\~/")"
+newPWD="$(echo -n ${PWD} | sed -e "s|$HOME|\~|")"
 
 gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
 if [[ -z $gitBranch ]]; then
