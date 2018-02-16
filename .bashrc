@@ -116,6 +116,11 @@ let usersize=$(echo -n $usernam | wc -c | tr -d " ")
 newPWD="${PWD}"
 newPWD="$(echo -n ${PWD} | sed -e "s|$HOME|\~|")"
 
+pwdSurroundColor=$LIGHT_BLUE
+if [ ! -w ${PWD} ]; then
+  pwdSurroundColor=$RED
+fi
+
 gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
 if [[ -z $gitBranch ]]; then
   gitBranch=$(date +%H:%M);
@@ -156,9 +161,9 @@ else
 	EXIT_SMILEY="$GREEN:)"
 fi
 
-PS1="$CYAN_BOLD-$LIGHT_BLUE-(\
+PS1="$CYAN_BOLD-$pwdSurroundColor-(\
 $CYAN\${usernam}$LIGHT_BLUE@$CYAN\${newPWD}\
-${LIGHT_BLUE})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-(\
+${pwdSurroundColor})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-(\
 $GITCOLOR\${gitBranch}\
 $LIGHT_BLUE)-$CYAN_BOLD-\
 \n\
