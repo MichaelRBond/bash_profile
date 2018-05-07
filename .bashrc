@@ -84,6 +84,7 @@ function _colorman() {
     LESS_TERMCAP_so=$(printf "\e[7;40m") \
     LESS_TERMCAP_ue=$(printf "\e[0m") \
     LESS_TERMCAP_us=$(printf "\e[1;33m") \
+    GROFF_NO_SGR=1 \
       "$@"
 }
 function man() { _colorman man "$@"; }
