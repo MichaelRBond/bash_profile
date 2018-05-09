@@ -229,6 +229,30 @@ function _autoComplete_cdgit() {
 }
 complete -F _autoComplete_cdgit cdgit
 
+function _autoComplete_yarn_run() {
+  local cur="${COMP_WORDS[COMP_CWORD]}"
+  local cmd="${COMP_WORDS[COMP_CWORD-1]}"
+  local pwd=$(pwd)
+  local result
+  if [ "${cmd}" == "yarn" ]; then
+    if [ ! -d "${pwd}/node_modules/.bin" ]; then
+      return
+    fi
+    COMPREPLY=( $(compgen -W '$(\ls $pwd/node_modules/.bin/)' -- $cur) )
+    return
+  fi
+  if [ "${cmd}" == "run" ]; then
+    if [ ! -f "${pwd}/package.json" ]; then
+      return
+    fi
+    local scripts=$(jq -r '.scripts | keys[]' "${pwd}/package.json")
+    COMPREPLY=( $(compgen -W "${scripts}" "${cur}") )
+    return
+  fi
+}
+complete -F _autoComplete_yarn_run yarn
+complete -F _autoComplete_yarn_run npm
+
 # Adds in a ton of autocompletes for bash
 if [ -f $LOCALBIN/bash_completion ]; then
      . $LOCALBIN/bash_completion
