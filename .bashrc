@@ -135,77 +135,67 @@ EXIT_SMILEY=":-/"
 GITCOLOR=$YELLOW
 
 function prompt {
+  EXIT_STATUS=$?
 
-EXIT_STATUS=$?
+  # for `hstr`
+  history -a # Append history lines from the current session to the history file
+  history -n # Read the history file into memory
 
-TERMWIDTH=${COLUMNS}
+  TERMWIDTH=${COLUMNS}
 
-usernam=$(whoami)
-let usersize=$(echo -n $usernam | wc -c | tr -d " ")
+  usernam=$(whoami)
+  let usersize=$(echo -n $usernam | wc -c | tr -d " ")
 
-newPWD="${PWD}"
-newPWD="$(echo -n ${PWD} | sed -e "s|$HOME|\~|")"
+  newPWD="${PWD}"
+  newPWD="$(echo -n ${PWD} | sed -e "s|$HOME|\~|")"
 
-pwdSurroundColor=$LIGHT_BLUE
-if [ ! -w ${PWD} ]; then
-  pwdSurroundColor=$RED
-fi
+  pwdSurroundColor=$LIGHT_BLUE
+  if [[ ! -w ${PWD} ]]; then
+    pwdSurroundColor=$RED
+  fi
 
-gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
-if [[ -z $gitBranch ]]; then
-  gitBranch=$(date +%H:%M);
-  GITCOLOR=$CYAN;
-else
-  GITCOLOR=$YELLOW;
-fi
+  gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+  if [[ -z $gitBranch ]]; then
+    gitBranch=$(date +%H:%M);
+    GITCOLOR=$CYAN;
+  else
+    GITCOLOR=$YELLOW;
+  fi
 
-gitDirty=$(git status --porcelain 2> /dev/null)
-if [[ -n $gitDirty ]]; then
-  GITCOLOR=$RED;
-fi
+  gitDirty=$(git status --porcelain 2> /dev/null)
+  if [[ -n $gitDirty ]]; then
+    GITCOLOR=$RED;
+  fi
 
-let pwdsize=$(echo -n ${newPWD} | wc -c | tr -d " ")
-let promptsize=$(echo -n "--(${usernam}@${newPWD})---(${gitBranch})--" | wc -c | tr -d " ")
-let fillsize=${TERMWIDTH}-${promptsize}
+  let pwdsize=$(echo -n ${newPWD} | wc -c | tr -d " ")
+  let promptsize=$(echo -n "--(${usernam}@${newPWD})---(${gitBranch})--" | wc -c | tr -d " ")
+  let fillsize=${TERMWIDTH}-${promptsize}
 
-fill=""
-while [ "$fillsize" -gt "0" ]
-do
-   fill="${fill}-===--===-"
-   let fillsize=${fillsize}-10
-done
+  fill=""
+  while [[ $fillsize -gt 0 ]]; do
+    fill="${fill}-===--===-"
+    let fillsize=${fillsize}-10
+  done
 
-if [ "$fillsize" -lt "0" ]
-	then
+  if [[ $fillsize -lt 0 ]]; then
+    let cut=0-${fillsize}
+    fill="$(echo -n $fill | sed -e "s/\(^.\{$cut\}\)\(.*\)/\2/")"
 
-	let cut=0-${fillsize}
-	fill="$(echo -n $fill | sed -e "s/\(^.\{$cut\}\)\(.*\)/\2/")"
+  fi
 
-fi
+  if [[ $EXIT_STATUS -ne 0 ]]; then
+    EXIT_SMILEY="$RED:("
+  else
+    EXIT_SMILEY="$GREEN:)"
+  fi
 
-
-if [ $EXIT_STATUS -ne 0 ]
-	then
-	EXIT_SMILEY="$RED:("
-else
-	EXIT_SMILEY="$GREEN:)"
-fi
-
-PS1="$CYAN_BOLD-$pwdSurroundColor-(\
-$CYAN\${usernam}$LIGHT_BLUE@$CYAN\${newPWD}\
-${pwdSurroundColor})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-(\
-$GITCOLOR\${gitBranch}\
-$LIGHT_BLUE)-$CYAN_BOLD-\
-\n\
-$CYAN_BOLD-$LIGHT_BLUE-($CYAN$EXIT_SMILEY$LIGHT_BLUE)-$CYAN_BOLD-:$NO_COLOUR "
-
+  PS1="$CYAN_BOLD-$pwdSurroundColor-($CYAN\${usernam}$LIGHT_BLUE@$CYAN\${newPWD}${pwdSurroundColor})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-($GITCOLOR\${gitBranch}$LIGHT_BLUE)-$CYAN_BOLD-\n$CYAN_BOLD-$LIGHT_BLUE-($CYAN$EXIT_SMILEY$LIGHT_BLUE)-$CYAN_BOLD-:$NO_COLOUR "
 }
 
 PROMPT_COMMAND=prompt
 
 # Setup hstr
-export PROMPT_COMMAND="history -a; history -n; ${PROMPT_COMMAND}"   # mem/file sync
-# if this is interactive shell, then bind hh to Ctrl-r (for Vi mode check doc)
+# Bind `hstr` to Ctrl+r, if this is interactive shell,
 if [[ $- =~ .*i.* ]]; then bind '"\C-r": "\C-a hh -- \C-j"'; fi
 
 ###############################################################################
