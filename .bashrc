@@ -230,14 +230,16 @@ function _autoComplete_yarn_run() {
     fi
     COMPREPLY=( $(compgen -W '$(\ls $pwd/node_modules/.bin/)' -- $cur) )
     return
-  fi
-  if [ "${cmd}" == "run" ]; then
+  elif [ "${cmd}" == "run" ]; then
     if [ ! -f "${pwd}/package.json" ]; then
       return
     fi
     local scripts=$(jq -r '.scripts | keys[]' "${pwd}/package.json")
     COMPREPLY=( $(compgen -W "${scripts}" "${cur}") )
     return
+  else
+    # fall back to directory completion
+    _filedir
   fi
 }
 complete -F _autoComplete_yarn_run yarn
