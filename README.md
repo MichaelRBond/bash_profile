@@ -9,3 +9,17 @@ Supports both Linux and MacOS
 * custom prompt, with basic git support
 * tmux configuration
 * Aliases
+
+
+## The follow software is expected
+
+### Linux and Mac
+
+1. tmux
+1. exa - ls replacement
+1. htop - top replacement
+1. hh - bash history
+
+### Mac
+
+1. reattach-to-user-namespace
