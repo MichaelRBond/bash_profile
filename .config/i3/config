@@ -141,8 +141,8 @@ bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute s
 
 # Monitor Brightness
 # https://gitlab.com/cameronnemo/brillo
-bindsym XF86MonBrightnessUp exec sudo brillo -A 10 # increase screen brightness
-bindsym XF86MonBrightnessDown exec sudo brillo -U 10 # decrease screen brightness
+bindsym XF86MonBrightnessUp exec --no-startup-id sudo brillo -A 10 # increase screen brightness
+bindsym XF86MonBrightnessDown exec --no-startup-id sudo brillo -U 10 # decrease screen brightness
 
 
 # Start i3bar to display a workspace bar (plus the system information i3status
@@ -155,7 +155,7 @@ bar {
         position        top
 }
 
-exec --no-startup-id feh --bg-f3ill ~/Pictures/background_flying.jpg
+exec --no-startup-id feh --bg-fill ~/Pictures/background_flying.jpg
 
 ## These are commented out to help conserve batteryb
 # exec --no-startup-id nm-applet # Network Manager Applet
