@@ -17,7 +17,7 @@ bindsym $mod+ctrl+s exec i3suspend.sh suspend
 bindsym $mod+ctrl+h exec i3suspend.sh hibernate
 
 # start a terminal
-bindsym $mod+Return exec terminator
+bindsym $mod+Return exec st
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -72,8 +72,8 @@ bindsym $mod+a focus parent
 set $ws1 "Main"
 set $ws2 "Chats"
 set $ws3 "Coding"
-set $ws4 "4"
-set $ws5 "5"
+set $ws4 "Terminal"
+set $ws5 "Misc"
 set $ws6 "6"
 set $ws7 "7"
 set $ws8 "8"
