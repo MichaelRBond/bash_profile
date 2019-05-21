@@ -70,6 +70,7 @@ alias ag='ag --hidden'
 case $OSTYPE in
   linux*)
     alias ls='ls --color'
+    alias df="df -x squashfs"  
 
     # Reset HiDPI settings
     alias resetScreen='xrandr -s 0 --dpi 192XSX'
