@@ -1,6 +1,7 @@
 [user]
 	name = Michael Bond
 	email = software@the-forgotten.org
+	signingKey = ""
 [mergetool]
 	keepBackup = true
 [core]
@@ -9,3 +10,9 @@
 [push]
 	default = simple
 	
+[gpg]
+	program = gpg
+[commit]
+	gpgSign = false
+[tag]
+	forceSignAnnotated = false
