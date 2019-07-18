@@ -65,7 +65,7 @@ fi
 # Aliases
 
 # Silver Searcher searches hidden files
-alias ag='ag --hidden'
+alias ag='ag --hidden --ignore ".git"'
 
 case $OSTYPE in
   linux*)
@@ -125,6 +125,9 @@ function man() { _colorman man "$@"; }
 if [ -f /Applications/Emacs.app/Contents/MacOS/Emacs ]
 then
     alias emacs="/Applications/Emacs.app/Contents/MacOS/Emacs --no-splash"
+elif [ -f /usr/local/bin/emacs ]
+then
+    alias emacs="/usr/local/bin/emacs --no-splash -nw"
 else
     alias emacs="emacs --no-splash -nw"
 fi
