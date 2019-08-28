@@ -4,9 +4,9 @@
 (setq vc-follow-symlinks nil)
 
 ;; Directory where .el packages are located
-(add-to-list 'load-path "~/.emacs.d/packages")
+;;(add-to-list 'load-path "~/.emacs.d/packages")
 ;; undo-tree enables redo
-(require `undo-tree)
+;;(require `undo-tree)
 
 ;; Turn on ncua mode so ctrl+c, v, x work for copy, paste, cut
 (cua-mode t)
@@ -54,10 +54,10 @@
 (setq tab-width 2)
 
 ;;turn on everywhere
-(global-undo-tree-mode 1)
-(global-set-key (kbd "C-/") 'undo)
-(defalias 'redo 'undo-tree-redo)
-(global-set-key (kbd "C-?") 'redo)
+;;(global-undo-tree-mode 1)
+;;(global-set-key (kbd "C-/") 'undo)
+;;(defalias 'redo 'undo-tree-redo)
+;;(global-set-key (kbd "C-?") 'redo)
 
 ;; Move current line or selected text
 (defun move-text-internal (arg)
