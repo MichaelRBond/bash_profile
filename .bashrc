@@ -256,6 +256,11 @@ if [[ $- =~ .*i.* ]]; then bind '"\C-r": "\C-a hh -- \C-j"'; fi
 # }
 # complete -F _autoComplete_Hostname ssh
 
+# flutter bash completion
+if [ -x "$(command -v flutter)" ]; then
+  eval "$(flutter bash-completion)"
+fi
+
 # for cdgit, autocompletes the directories under the github base
 function _autoComplete_cdgit() {
     local cur
