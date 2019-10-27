@@ -70,7 +70,7 @@ alias ag='ag --hidden --ignore ".git"'
 case $OSTYPE in
   linux*)
     alias ls='ls --color'
-    alias df="df -x squashfs"  
+    alias df="df -x squashfs"
 
     # Reset HiDPI settings
     alias resetScreen='xrandr -s 0 --dpi 192XSX'
@@ -151,6 +151,20 @@ export -f cdgit
 # Splash Screen
 
 cat "$SPLASH_SCREEN"
+
+###############################################################################
+# Setup cat
+
+function _cat() {
+  FILE=${@: -1}
+  if [[ -x "$(command -v mdcat)" && ( "${FILE##*.}" = "md" || "${FILE##*.}" = "markdown" ) ]]
+  then
+    mdcat "$@"
+  else
+    cat "$@"
+  fi
+}
+alias cat="_cat $@"
 
 ###############################################################################
 # Prompt
