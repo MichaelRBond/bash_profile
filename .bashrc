@@ -40,7 +40,7 @@ fi
 files=("$HOME"/.splashes/*)
 
 export LOCALBIN="$HOME/bin"
-export GITHOME="$HOME/Dropbox/GIT"
+export GITHOME="$HOME/Documents/GIT"
 export SPLASH_SCREEN="${files[RANDOM % ${#files[@]}]}"
 export GOPATH="$GITHOME/go/"
 export SNAPBIN="/snap/bin"
