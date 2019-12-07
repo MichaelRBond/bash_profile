@@ -82,6 +82,9 @@ case $OSTYPE in
 
     # Load tmux with linux config
     alias tmux="tmux -f ~/.tmux/configs/tmux.linux.conf"
+
+    # Alias to run GUI apps with `sudo` in Wayload
+    alias allowGuiAsRoot="xhost +si:localuser:root > /dev/null"
     ;;
   darwin*)
     alias ls='ls -G'
