@@ -1,0 +1,280 @@
+// Place your settings in this file to overwrite the default settings
+{
+    "editor.tabSize": 2,
+    "editor.cursorStyle": "line-thin",
+    "workbench.colorTheme": "Twilight",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "editor.rulers": [
+        120
+    ],
+    "todohighlight.isEnable": true,
+    "todohighlight.keywords": [
+        {
+            "text": " TODO:",
+            "color": "yellow",
+            "backgroundColor": "rgba(255, 255, 255, 0.1)"
+        },
+        {
+            "text": " TODO :",
+            "color": "yellow",
+            "backgroundColor": "rgba(255, 255, 255, 0.1)"
+        },
+        {
+          "text": " TODO",
+          "color": "yellow",
+          "backgroundColor": "rgba(255, 255, 255, 0.1)"
+        },
+        {
+          "text": " Todo:",
+          "color": "yellow",
+          "backgroundColor": "rgba(255, 255, 255, 0.1)"
+        },
+        {
+          "text": " Todo",
+          "color": "yellow",
+          "backgroundColor": "rgba(255, 255, 255, 0.1)"
+        },
+    ],
+    "todohighlight.defaultStyle": {
+        "color": "yellow",
+        "backgroundColor": "rgba(255, 255, 255, 0.1)",
+    },
+    "editor.autoIndent": true,
+    "editor.minimap.showSlider": "mouseover",
+    "editor.minimap.enabled": false,
+    "window.zoomLevel": 0,
+    "explorer.confirmDelete": false,
+    "java.errors.incompleteClasspath.severity": "ignore",
+    "search.location": "panel",
+    "cSpell.allowCompoundWords": true,
+    "cSpell.ignoreWords": [
+        "addrs",
+        "amatheny",
+        "appium",
+        "apdex",
+        "apns",
+        "ballista's",
+        "boba",
+        "cids",
+        "csimoneau",
+        "cognito",
+        "controllo",
+        "customizations",
+        "fett",
+        "integ",
+        "jdulay",
+        "jmui",
+        "joeg",
+        "kdao",
+        "mbond",
+        "nsisodraker",
+        "rsakhamoori",
+        "ulammatha",
+        "amazonaws",
+        "apikey",
+        "appname",
+        "areacode",
+        "argparse",
+        "argparser",
+        "backend",
+        "ballista",
+        "ccpa",
+        "checkboxes",
+        "chommp",
+        "cidr",
+        "clss",
+        "controllo",
+        "creds",
+        "Cupertino",
+        "customizer",
+        "deserialize",
+        "dynamodb",
+        "errored",
+        "ffid",
+        "fqdn",
+        "froms",
+        "gmail",
+        "godaddy",
+        "guid",
+        "Hussmann",
+        "IANA",
+        "injectable",
+        "inmemory",
+        "inversify",
+        "ipcidr",
+        "jira",
+        "lcov",
+        "lcovonly",
+        "libphonenumber",
+        "lspace",
+        "mangonel",
+        "mdgp",
+        "memoized",
+        "mfar",
+        "milli",
+        "millis",
+        "mgmt",
+        "moveaws",
+        "moveinc",
+        "myaccount",
+        "msgs",
+        "Nagios",
+        "nrql",
+        "nvmrc",
+        "nylas",
+        "okta",
+        "opcity",
+        "optimizely",
+        "prosoft",
+        "qastaging",
+        "Realsuite",
+        "reauth",
+        "Rehydrated",
+        "repo",
+        "requeues",
+        "resync",
+        "Roboto",
+        "rspace",
+        "Schyler",
+        "sensu",
+        "signup",
+        "skippable",
+        "smtp",
+        "splitio",
+        "splunk",
+        "sqft",
+        "sqls",
+        "tcpa",
+        "tcpaconsent",
+        "themyscira",
+        "tphub",
+        "tphubdev",
+        "tphubqa",
+        "tphubprod",
+        "treb",
+        "trebid",
+        "trebuchet",
+        "trebuchet's",
+        "truthy",
+        "tsdv",
+        "tsoa",
+        "twilio",
+        "typedi",
+        "uuid",
+        "uuidv",
+        "unmount",
+        "unmounting",
+        "upsert",
+        "valign",
+        "voip",
+        "wdio",
+        "xmlns",
+        "xpath",
+    ],
+    "cSpell.diagnosticLevel": "Warning",
+    "explorer.openEditors.visible": 0,
+    "journal.base": "~/Documents/vscode/journal",
+    "editor.lineNumbers": "on",
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "scope": "text.html.markdown.journal.task.open.bullet",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.open.marker",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.open.keyword",
+          "settings": {
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.open.text",
+          "settings": {}
+        },
+        {
+          "scope": "text.html.markdown.journal.task.completed.keyword",
+          "settings": {
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.completed.marker",
+          "settings": {
+            "foreground": "#AAAAAA"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.completed.text",
+          "settings": {
+            "foreground": "#AAAAAA"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.task.completed.bullet",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.memo.keyword",
+          "settings": {
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.memo.bullet",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.scope",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.link.keyword",
+          "settings": {
+            "fontStyle": "italic"
+          }
+        },
+        {
+          "scope": "text.html.markdown.journal.link.bullet",
+          "settings": {
+            "foreground": "#FFFF00"
+          }
+        }
+      ]
+    },
+    "vsnotes.defaultNotePath": "~/Documents/vscode/vsnote",
+    "breadcrumbs.enabled": true,
+    "tsimporter.doubleQuotes": true,
+    "typescript.preferences.quoteStyle": "double",
+    "javascript.preferences.quoteStyle": "single",
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    "files.exclude": {
+      "**/.classpath": true,
+      "**/.project": true,
+      "**/.settings": true,
+      "**/.factorypath": true
+    },
+    "extensions.ignoreRecommendations": false,
+    "vsicons.dontShowNewVersionMessage": true,
+    "editor.renderWhitespace": "selection",
+    "workbench.statusBar.visible": true,
+    "workbench.activityBar.visible": true,
+    "python.jediEnabled": false,
+    "dart.openDevTools": "flutter"
+  }
