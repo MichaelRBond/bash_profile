@@ -273,7 +273,14 @@ function _autoComplete_cdgit() {
 }
 complete -F _autoComplete_cdgit cdgit
 
+# yarn <tab> : Lists commands from `node_modules/.bon`
+# yarn run <tab> : Scripts from package.json (correctly handles `:` in script names)
+# yarn why <tab> : installed modules
+# yarn add | remove <tab> : dependencies and devDependencies from package.json
 function _autoComplete_yarn_run() {
+  local cur
+  cur="${COMP_WORDS[COMP_CWORD]}"
+
   local yarn_cmd
   yarn_cmd="${COMP_WORDS[1]}"
 
@@ -285,30 +292,29 @@ function _autoComplete_yarn_run() {
     fi
     local scripts
     scripts=$(jq -r '.scripts | keys[]' "${dir}/package.json")
-    local cur
-    cur="${COMP_WORDS[COMP_CWORD]}"
     _get_comp_words_by_ref -n : -c cur
     COMPREPLY=( $(compgen -W "${scripts}" "${cur}") )
     __ltrim_colon_completions "$cur"
     return
-  elif [ "${yarn_cmd}" == "remove" ]; then
+  elif [ "${yarn_cmd}" == "remove" ] || [ "${yarn_cmd}" == "add" ]; then
     if [ ! -f "${dir}/package.json" ]; then
       return
     fi
     local packages
     packages=$(jq -r '.dependencies * .devDependencies | keys[]' "${dir}/package.json")
-    local cur
-    cur="${COMP_WORDS[COMP_CWORD]}"
     _get_comp_words_by_ref -n : -c cur
     COMPREPLY=( $(compgen -W "${packages}" "${cur}") )
     __ltrim_colon_completions "$cur"
+    return
+  elif [ "${yarn_cmd}" == "why" ]; then
+    local modules
+    modules=$(yarn list --depth 0 | sed -n 's/.* \([a-zA-Z0-9@].*\)@.*/\1/p') || return 1
+    COMPREPLY=( $(compgen -W "${modules}" -- "$cur") )
     return
   else
     if [ ! -d "${dir}/node_modules/.bin" ]; then
       return
     fi
-    local cur
-    cur="${COMP_WORDS[COMP_CWORD]}"
     COMPREPLY=( $(compgen -W "$(\ls $dir/node_modules/.bin/)" -- "$cur") )
     return
   fi
