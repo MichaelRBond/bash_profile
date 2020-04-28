@@ -274,29 +274,43 @@ function _autoComplete_cdgit() {
 complete -F _autoComplete_cdgit cdgit
 
 function _autoComplete_yarn_run() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  local cmd
-  cmd="${COMP_WORDS[COMP_CWORD-1]}"
+  local yarn_cmd
+  yarn_cmd="${COMP_WORDS[1]}"
+
   local dir
   dir=$(pwd)
-  if [ "${cmd}" == "yarn" ]; then
-    if [ ! -d "${dir}/node_modules/.bin" ]; then
-      return
-    fi
-    COMPREPLY=( $(compgen -W "$(\ls $dir/node_modules/.bin/)" -- "$cur") )
-    return
-  elif [ "${cmd}" == "run" ]; then
+  if [ "${yarn_cmd}" == "run" ]; then
     if [ ! -f "${dir}/package.json" ]; then
       return
     fi
     local scripts
     scripts=$(jq -r '.scripts | keys[]' "${dir}/package.json")
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    _get_comp_words_by_ref -n : -c cur
     COMPREPLY=( $(compgen -W "${scripts}" "${cur}") )
+    __ltrim_colon_completions "$cur"
+    return
+  elif [ "${yarn_cmd}" == "remove" ]; then
+    if [ ! -f "${dir}/package.json" ]; then
+      return
+    fi
+    local packages
+    packages=$(jq -r '.dependencies * .devDependencies | keys[]' "${dir}/package.json")
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    _get_comp_words_by_ref -n : -c cur
+    COMPREPLY=( $(compgen -W "${packages}" "${cur}") )
+    __ltrim_colon_completions "$cur"
     return
   else
-    # fall back to directory completion
-    _filedir
+    if [ ! -d "${dir}/node_modules/.bin" ]; then
+      return
+    fi
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=( $(compgen -W "$(\ls $dir/node_modules/.bin/)" -- "$cur") )
+    return
   fi
 }
 complete -F _autoComplete_yarn_run yarn
