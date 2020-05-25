@@ -18,7 +18,9 @@ Supports both Linux and MacOS
 1. tmux
 1. exa - ls replacement
 1. htop - top replacement
-1. hh - bash history
+1. [hh - hstr](https://github.com/dvorka/hstr) - bash history
+1. [mdcat](https://github.com/lunaryorn/mdcat)
+1. [xclip](https://github.com/astrand/xclip) -- For copy/Paste in tmux
 
 ### Mac
 
