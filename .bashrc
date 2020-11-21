@@ -273,7 +273,7 @@ function _autoComplete_cdgit() {
 }
 complete -F _autoComplete_cdgit cdgit
 
-# yarn <tab> : Lists commands from `node_modules/.bon`
+# yarn <tab> : Lists commands from `node_modules/.bin`
 # yarn run <tab> : Scripts from package.json (correctly handles `:` in script names)
 # yarn why <tab> : installed modules
 # yarn add | remove <tab> : dependencies and devDependencies from package.json
@@ -311,14 +311,19 @@ function _autoComplete_yarn_run() {
     modules=$(yarn list --depth 0 | sed -n 's/.* \([a-zA-Z0-9@].*\)@.*/\1/p') || return 1
     COMPREPLY=( $(compgen -W "${modules}" -- "$cur") )
     return
-  else
+  elif [ -z "${yarn_cmd}" ]; then
     if [ ! -d "${dir}/node_modules/.bin" ]; then
       return
     fi
-    COMPREPLY=( $(compgen -W "$(\ls $dir/node_modules/.bin/)" -- "$cur") )
+    node_modules_cmds=$(ls "$dir/node_modules/.bin/")
+    COMPREPLY=( $(compgen -W "${node_modules_cmds}" -- "$cur") )
     return
+  else
+    # fall back to directory completion. Useful for commands that take a path
+    _filedir
   fi
 }
+
 complete -F _autoComplete_yarn_run yarn
 complete -F _autoComplete_yarn_run npm
 
