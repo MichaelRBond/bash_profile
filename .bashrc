@@ -23,6 +23,7 @@
 # Colorize man pages
 # Set default editor to emacs (no window), if it is installed
 # alias top command to htop
+# Installs direnv hooks
 
 # Work around for NVM bug with tmux
 # https://github.com/creationix/nvm/issues/1652
@@ -228,7 +229,6 @@ function prompt {
   if [[ $fillsize -lt 0 ]]; then
     (( cut=0-fillsize ))
     fill="$(echo -n $fill | sed -e "s/\\(^.\\{$cut\\}\\)\\(.*\\)/\\2/")"
-
   fi
 
   if [[ $EXIT_STATUS -ne 0 ]]; then
@@ -341,4 +341,8 @@ fi
 
 if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]]; then
   tmux
+fi
+
+if [[ -x $(command -v direnv) ]]; then
+  eval "$(direnv hook bash)"
 fi
