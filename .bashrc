@@ -59,7 +59,8 @@ export HISTSIZE=${HISTFILESIZE}  # increase history size (default is 500)
 
 # Set emacs as default system editor
 if [ -x "$(command -v emacs)" ]; then
-  export EDITOR="emacs -nw"
+    export EDITOR="emacs -nw"
+    alias xemacs="emacs"
 fi
 
 ###############################################################################
@@ -110,6 +111,12 @@ if [ -x "$(command -v exa)" ]; then
   alias ls="exa"
 fi
 
+# If `duf` is installed, use it instead of df
+if [ -x "$(command -v duf)" ]; then
+  alias df='duf --output mountpoint,used,size,avail,usage,type --sort used  --hide-fs nullfs --hide special --width $((COLUMNS+20))'
+  alias duf='duf --output mountpoint,used,size,avail,usage,type --sort used  --hide-fs nullfs --hide special --width $((COLUMNS+20))'
+fi
+
 # make man pages colorful
 function _colorman() {
   env \
@@ -138,9 +145,8 @@ fi
 
 #change into my base Git repo directory, or into a specific project directory
 function cdgit {
-
-    if [[ ! -n $1 ]]; then
-        cd "$GITHOME" || return
+    if [[ -z $1 ]]; then
+      cd "$GITHOME" || return
     else
     	cd "$GITHOME/$1" || return
     fi
@@ -150,6 +156,18 @@ function cdgit {
     fi
 }
 export -f cdgit
+
+function trim_newline_from_eof {
+  if [[ -z $1 ]]; then
+    echo "No filename provided"
+    return 1
+  fi
+  if [[ ! -f $1 ]]; then
+    echo "Filename is not a file"
+    return 1
+  fi
+  perl -pi -e 'chomp if eof' "$1"
+}
 
 ###############################################################################
 # Splash Screen
@@ -351,3 +369,11 @@ fi
 if [[ -x $(command -v direnv) ]]; then
   eval "$(direnv hook bash)"
 fi
+
+# bash completion for python invoke
+_complete_invoke() {
+    local candidates
+    candidates=`invoke --complete -- ${COMP_WORDS[*]}`
+    COMPREPLY=( $(compgen -W "${candidates}" -- $2) )
+}
+complete -F _complete_invoke -o default invoke inv
