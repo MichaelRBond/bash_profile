@@ -68,6 +68,7 @@ fi
 
 # Silver Searcher searches hidden files
 alias ag='ag --hidden --ignore ".git"'
+alias curltime='curl -w "@$HOME/.curl-time" -s '
 
 case $OSTYPE in
   linux*)
@@ -116,6 +117,18 @@ if [ -x "$(command -v duf)" ]; then
   alias df='duf --output mountpoint,used,size,avail,usage,type --sort used  --hide-fs nullfs --hide special --width $((COLUMNS+20))'
   alias duf='duf --output mountpoint,used,size,avail,usage,type --sort used  --hide-fs nullfs --hide special --width $((COLUMNS+20))'
 fi
+
+if [ -x "$(command -v dust)" ]; then
+  alias du='dust -n 100'
+fi
+
+function udm() {
+  if [ -f "yarn.lock" ]; then
+    yarn "$@"
+  else
+    npm "$@"
+  fi
+}
 
 # make man pages colorful
 function _colorman() {
@@ -377,3 +390,4 @@ _complete_invoke() {
     COMPREPLY=( $(compgen -W "${candidates}" -- $2) )
 }
 complete -F _complete_invoke -o default invoke inv
+. "$HOME/.cargo/env"
