@@ -22,6 +22,7 @@ Supports both Linux and MacOS
 1. [mdcat](https://github.com/lunaryorn/mdcat)
 1. [direnv](https://direnv.net)
 2. [duf](https://github.com/muesli/duf)
+3. [dust](https://github.com/bootandy/dust)
 
 ### Linux
 
