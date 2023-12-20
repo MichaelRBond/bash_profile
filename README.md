@@ -15,14 +15,16 @@ Supports both Linux and MacOS
 
 ### Linux and Mac
 
-1. tmux
-1. exa - ls replacement
-1. htop - top replacement
-1. [hh - hstr](https://github.com/dvorka/hstr) - bash history
-1. [mdcat](https://github.com/lunaryorn/mdcat)
-1. [direnv](https://direnv.net)
-2. [duf](https://github.com/muesli/duf)
-3. [dust](https://github.com/bootandy/dust)
+* tmux
+* exa - ls replacement
+* htop - top replacement
+* [hh - hstr](https://github.com/dvorka/hstr) - bash history
+* [mdcat](https://github.com/lunaryorn/mdcat)
+* [direnv](https://direnv.net)
+* [duf](https://github.com/muesli/duf)
+* [dust](https://github.com/bootandy/dust)
+* TMUX Plugins
+  * `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
 
 ### Linux
 
