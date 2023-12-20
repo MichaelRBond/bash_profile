@@ -139,6 +139,10 @@ function udm() {
   fi
 }
 
+function weather(){
+   curl https://wttr.in/${@:-<Morgantown_WV>}
+}
+
 # make man pages colorful
 function _colorman() {
   env \
@@ -384,7 +388,7 @@ if [ -f "$HOME/.local_profile" ]; then
   source "$HOME/.local_profile"
 fi
 
-if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]]; then
+if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]] || [[ "$TERM_PROGRAM" = "vscode" ]]; then
   tmux
 fi
 
@@ -416,4 +420,8 @@ if [ -f "$HOME/.sdkman/bin/sdkman-init.sh" ]; then
   #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
   export SDKMAN_DIR="$HOME/.sdkman"
   [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+fi
+
+if [[ -x $(command -v just) ]]; then
+  eval "$(just --completions bash)"
 fi
