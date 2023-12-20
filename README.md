@@ -25,6 +25,7 @@ Supports both Linux and MacOS
 * [dust](https://github.com/bootandy/dust)
 * TMUX Plugins
   * `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
+  * `git clone https://github.com/catppuccin/tmux.git ~/.tmux/plugins/tmux`
 
 ### Linux
 
