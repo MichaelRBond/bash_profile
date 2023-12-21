@@ -143,6 +143,16 @@ function weather(){
    curl https://wttr.in/${@:-<Morgantown_WV>}
 }
 
+function weather2(){
+
+  while true
+  do
+    clear
+    curl https://wttr.in/${@:-<Morgantown_WV>}?1Fu
+    sleep 600
+  done
+}
+
 # make man pages colorful
 function _colorman() {
   env \

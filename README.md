@@ -16,6 +16,9 @@ Supports both Linux and MacOS
 ### Linux and Mac
 
 * tmux
+  * TMUX Plugins
+    * `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
+    * `git clone https://github.com/catppuccin/tmux.git ~/.tmux/plugins/tmux`
 * exa - ls replacement
 * htop - top replacement
 * [hh - hstr](https://github.com/dvorka/hstr) - bash history
@@ -23,9 +26,8 @@ Supports both Linux and MacOS
 * [direnv](https://direnv.net)
 * [duf](https://github.com/muesli/duf)
 * [dust](https://github.com/bootandy/dust)
-* TMUX Plugins
-  * `git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm`
-  * `git clone https://github.com/catppuccin/tmux.git ~/.tmux/plugins/tmux`
+* [ctop](https://github.com/bcicen/ctop) - Top for Containers
+* [bottom](https://github.com/ClementTsang/bottom) - Graphical system monitor
 
 ### Linux
 
