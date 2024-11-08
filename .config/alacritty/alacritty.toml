@@ -1,0 +1,44 @@
+[window]
+
+opacity = 1
+
+padding.x = 1
+padding.y = 1
+
+decorations = "Buttonless"
+decorations_theme_variant = "Dark"
+
+option_as_alt = "Both"
+
+[font]
+
+normal.family = "JetbrainsMono Nerd Font"
+bold.family = "JetbrainsMono Nerd Font"
+italic.family = "JetbrainsMono Nerd Font"
+bold_italic.family = "JetbrainsMono Nerd Font"
+
+size = 14
+
+[colors.normal]
+
+blue = "#6a84fb"
+green = "#00c200"
+cyan = "#00c5c7"
+red = "#c91b00"
+yellow = "#c7c400"
+
+[colors.bright]
+
+green = "#5ff967"
+cyan = "#5ffdff"
+red = "#ff6d67"
+yellow = "#fefb67"
+blue = "#99a0ff"
+
+[bell]
+
+duration = 0
+
+[mouse]
+
+hide_when_typing = false
