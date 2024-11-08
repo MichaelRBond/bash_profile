@@ -1,0 +1,23 @@
+{
+    "security.workspace.trust.untrustedFiles": "open",
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "workbench.colorTheme": "Tokyo Night",
+    "todohighlight.defaultStyle": {
+        "backgroundColor": "black",
+        "color": "yellow",
+    },
+    "markdown.marp.enableHtml": true,
+    "[sql]": {
+        "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+    },
+    "cSpell.userWords": [
+        "apfm",
+        "Belita",
+        "fivetran",
+        "reinquiries"
+    ],
+    "editor.minimap.enabled": false,
+    "redhat.telemetry.enabled": false
+}
