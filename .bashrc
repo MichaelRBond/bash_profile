@@ -407,8 +407,20 @@ if [ -f "$HOME/.local_profile" ]; then
   source "$HOME/.local_profile"
 fi
 
-if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]] || [[ "$TERM_PROGRAM" = "vscode" ]]; then
-  tmux
+# if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]] || [[ "$TERM_PROGRAM" = "vscode" ]]; then
+#  tmux
+# fi
+
+if [[ -z "$ZELLIJ" ]] && ! [[ "$TERM_PROGRAM" = "vscode" ]]; then
+  if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
+    zellij attach -c
+  else
+    zellij
+  fi
+
+  if [[ "$ZELLIJ_AUTO_EXIT" == "true" ]]; then
+    exit
+  fi
 fi
 
 if [[ -x $(command -v direnv) ]]; then
