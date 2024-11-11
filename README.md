@@ -13,7 +13,32 @@ Supports both Linux and MacOS
 
 ## The follow software is expected
 
-### Linux and Mac
+### Mac
+
+Run `setup.sh` to install all of the expected requirements and software. 
+After vscode is installed, with the command line integration, run the script in the `vscode` folder to install settings and extensions. 
+
+Manual Mac application installs: 
+
+* vscode
+* Jetbrains Mono Nerd Font: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip
+* 1password
+* arc
+* slack
+* signal
+* gitkraken
+* ms teams
+* ms word
+* ms excel
+* data grip
+* intellij
+* transmit
+* moom
+* zoom
+
+### Linux
+
+I haven't tested this on linux since switching to zellij from tmux. 
 
 * tmux
   * TMUX Plugins
@@ -34,5 +59,7 @@ Supports both Linux and MacOS
 1. [xclip](https://github.com/astrand/xclip) -- For copy/Paste in tmux
 
 ### Mac
+
+Required for tmux, not needed for zellij
 
 1. reattach-to-user-namespace
