@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-ln -s "${HOME}/Documents/z.setup/bash_profile/vscode/settings.json" "${HOME}/Library/Application Support/Code/User/settings.json"
-ln -s "${HOME}/Documents/z.setup/bash_profile/vscode/keybindings.json" "${HOME}/Library/Application Support/Code/User/keybindings.json"
+SETTINGS_FILE="${HOME}/Library/Application Support/Code/User/settings.json"
+KEYBINDINGS_FILE="${HOME}/Library/Application Support/Code/User/keybindings.json"
+rm -f "${SETTINGS_FILE}"
+rm -f "${KEYBINDINGS_FILE}"
+ln -s "${HOME}/Documents/z.setup/bash_profile/vscode/settings.json" "${SETTINGS_FILE}"
+ln -s "${HOME}/Documents/z.setup/bash_profile/vscode/keybindings.json" "${KEYBINDINGS_FILE}"
 
 code --install-extension bluebrown.yamlfmt
 code --install-extension davidanson.vscode-markdownlint
