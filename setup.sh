@@ -84,4 +84,4 @@ fi
 
 chsh -s /opt/homebrew/bin/bash
 
-# Development Setup
+mkdir -p ~/Documents/GIT
