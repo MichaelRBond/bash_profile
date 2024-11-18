@@ -389,6 +389,7 @@ function _autoComplete_yarn_run() {
 
 complete -F _autoComplete_yarn_run yarn
 complete -F _autoComplete_yarn_run npm
+complete -F _autoComplete_yarn_run pnpm
 
 # Adds in a ton of autocompletes for bash
 if [[ -f $LOCALBIN/bash_completion ]]; then
