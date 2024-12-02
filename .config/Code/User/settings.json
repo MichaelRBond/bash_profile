@@ -1,61 +1,27 @@
-// Place your settings in this file to overwrite the default settings
 {
-    "editor.tabSize": 2,
-    "editor.cursorStyle": "line-thin",
-    "workbench.colorTheme": "Twilight",
-    "files.trimTrailingWhitespace": true,
+    "security.workspace.trust.untrustedFiles": "open",
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
-    "editor.rulers": [
-        120
-    ],
-    "todohighlight.isEnable": true,
-    "todohighlight.keywords": [
-        {
-            "text": " TODO:",
-            "color": "yellow",
-            "backgroundColor": "rgba(255, 255, 255, 0.1)"
-        },
-        {
-            "text": " TODO :",
-            "color": "yellow",
-            "backgroundColor": "rgba(255, 255, 255, 0.1)"
-        },
-        {
-          "text": " TODO",
-          "color": "yellow",
-          "backgroundColor": "rgba(255, 255, 255, 0.1)"
-        },
-        {
-          "text": " Todo:",
-          "color": "yellow",
-          "backgroundColor": "rgba(255, 255, 255, 0.1)"
-        },
-        {
-          "text": " Todo",
-          "color": "yellow",
-          "backgroundColor": "rgba(255, 255, 255, 0.1)"
-        },
-    ],
+    "files.trimTrailingWhitespace": true,
+    "workbench.colorTheme": "Tokyo Night",
     "todohighlight.defaultStyle": {
+        "backgroundColor": "black",
         "color": "yellow",
-        "backgroundColor": "rgba(255, 255, 255, 0.1)",
     },
-    "editor.autoIndent": true,
-    "editor.minimap.showSlider": "mouseover",
-    "editor.minimap.enabled": false,
-    "window.zoomLevel": 0,
-    "explorer.confirmDelete": false,
-    "java.errors.incompleteClasspath.severity": "ignore",
-    "search.location": "panel",
+    "markdown.marp.enableHtml": true,
+    "[sql]": {
+        "editor.defaultFormatter": "inferrinizzard.prettier-sql-vscode"
+    },
     "cSpell.allowCompoundWords": true,
     "cSpell.ignoreWords": [
         "addrs",
         "amatheny",
+        "apfm",
         "appium",
         "apdex",
         "apns",
         "ballista's",
+        "Belita",
         "boba",
         "cids",
         "csimoneau",
@@ -93,6 +59,7 @@
         "dynamodb",
         "errored",
         "ffid",
+        "fivetran",
         "fqdn",
         "froms",
         "gmail",
@@ -132,6 +99,7 @@
         "Realsuite",
         "reauth",
         "Rehydrated",
+        "reinquiries",
         "repo",
         "requeues",
         "resync",
@@ -174,107 +142,7 @@
         "xpath",
     ],
     "cSpell.diagnosticLevel": "Warning",
-    "explorer.openEditors.visible": 0,
-    "journal.base": "~/Documents/vscode/journal",
-    "editor.lineNumbers": "on",
-    "editor.tokenColorCustomizations": {
-      "textMateRules": [
-        {
-          "scope": "text.html.markdown.journal.task.open.bullet",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.open.marker",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.open.keyword",
-          "settings": {
-            "fontStyle": "italic"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.open.text",
-          "settings": {}
-        },
-        {
-          "scope": "text.html.markdown.journal.task.completed.keyword",
-          "settings": {
-            "fontStyle": "italic"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.completed.marker",
-          "settings": {
-            "foreground": "#AAAAAA"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.completed.text",
-          "settings": {
-            "foreground": "#AAAAAA"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.task.completed.bullet",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.memo.keyword",
-          "settings": {
-            "fontStyle": "italic"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.memo.bullet",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.scope",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.link.keyword",
-          "settings": {
-            "fontStyle": "italic"
-          }
-        },
-        {
-          "scope": "text.html.markdown.journal.link.bullet",
-          "settings": {
-            "foreground": "#FFFF00"
-          }
-        }
-      ]
-    },
-    "vsnotes.defaultNotePath": "~/Documents/vscode/vsnote",
-    "breadcrumbs.enabled": true,
-    "tsimporter.doubleQuotes": true,
-    "typescript.preferences.quoteStyle": "double",
-    "javascript.preferences.quoteStyle": "single",
-    "editor.suggestSelection": "first",
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "files.exclude": {
-      "**/.classpath": true,
-      "**/.project": true,
-      "**/.settings": true,
-      "**/.factorypath": true
-    },
-    "extensions.ignoreRecommendations": false,
-    "vsicons.dontShowNewVersionMessage": true,
-    "editor.renderWhitespace": "selection",
-    "workbench.statusBar.visible": true,
-    "workbench.activityBar.visible": true,
-    "python.jediEnabled": false,
-    "dart.openDevTools": "flutter"
-  }
+    "editor.minimap.enabled": false,
+    "redhat.telemetry.enabled": false,
+    "editor.tabSize": 2
+}
