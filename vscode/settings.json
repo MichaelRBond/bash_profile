@@ -14,10 +14,24 @@
     },
     "cSpell.userWords": [
         "apfm",
+        "aplaceformom",
         "Belita",
+        "esbuild",
         "fivetran",
+        "localstack",
+        "metatype",
+        "Mockfill",
+        "nestjs",
+        "NOSONAR",
         "reinquiries"
     ],
     "editor.minimap.enabled": false,
-    "redhat.telemetry.enabled": false
+    "redhat.telemetry.enabled": false,
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "javascript.preferences.importModuleSpecifier": "relative",
+    "sonarlint.rules": {
+        "typescript:S6606": {
+            "level": "off"
+        }
+    }
 }
