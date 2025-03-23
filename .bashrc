@@ -168,6 +168,18 @@ if [ -x "$(command -v dust)" ]; then
   alias du='dust -n 100'
 fi
 
+# ZelliJ New Tab
+# Changes to home directory if no directory is specified. 
+# Second arg changes the tab title
+# also uses cdgit tab completion, since the most common use case of changing directories with a new tab is to change to a git repo
+function znt() {
+  cwd="${HOME}"
+  if [[ -n $1 && -d "${GITHOME}/${1}" ]]; then
+    cwd="${GITHOME}/${1}"
+  fi
+  zellij action new-tab --name "$2" --cwd "${cwd}" -l compact
+}
+
 function udm() {
   if [ -f "yarn.lock" ]; then
     yarn "$@"
@@ -363,6 +375,7 @@ function _autoComplete_cdgit() {
     COMPREPLY=( $(compgen -W "$(\ls $GITHOME/)" -- "$cur") )
 }
 complete -F _autoComplete_cdgit cdgit
+complete -F _autoComplete_cdgit znt
 
 # yarn <tab> : Lists commands from `node_modules/.bin`
 # yarn run <tab> : Scripts from package.json (correctly handles `:` in script names)
