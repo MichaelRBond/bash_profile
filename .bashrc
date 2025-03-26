@@ -443,6 +443,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [[ -f .nvmrc && -z "$NVM_USED" ]]; then
+  # If .nvmrc exists in the directory where the shell opens
+  nvm use
+fi
 
 if [ -f "$HOME/.local_profile" ]; then
   # shellcheck source=/dev/null
