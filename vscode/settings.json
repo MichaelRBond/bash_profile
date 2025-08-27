@@ -14,10 +14,44 @@
     },
     "cSpell.userWords": [
         "apfm",
+        "apikey",
+        "aplaceformom",
         "Belita",
+        "BMAD",
+        "esbuild",
+        "eventbridge",
+        "FAMILYFILE",
+        "familyfiles",
         "fivetran",
-        "reinquiries"
+        "localstack",
+        "marketo",
+        "mbond",
+        "metatype",
+        "Mockfill",
+        "nestjs",
+        "NEXTGEN",
+        "NOSONAR",
+        "opensearch",
+        "POSTHOG",
+        "reinquiries",
+        "touchpoint",
+        "tsoa"
     ],
     "editor.minimap.enabled": false,
-    "redhat.telemetry.enabled": false
+    "redhat.telemetry.enabled": false,
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "javascript.preferences.importModuleSpecifier": "relative",
+    "sonarlint.connectedMode.connections.sonarqube": [
+        {
+            "serverUrl": "https://sonarqube.us-west-2.dev.apfmtech.com",
+            "connectionId": "https-sonarqube-us-west-2-dev-apfmtech-com"
+        }
+    ],
+    "sonarlint.rules": {
+        "typescript:S6606": {
+            "level": "off"
+        }
+    },
+    "python.analysis.extraPaths": [],
+    "github.copilot.nextEditSuggestions.enabled": true
 }

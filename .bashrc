@@ -1,3 +1,7 @@
+#!/bin/bash
+
+[[ $- != *i* ]] && return
+
 ### Features
 #
 # Compatible with both Linux and MacOS
@@ -42,11 +46,11 @@ if [ -f /etc/bashrc ]; then
 	source /etc/bashrc
 fi
 
-files=("$HOME"/.splashes/*)
+splash_files=("$HOME"/.splashes/*)
 
 export LOCALBIN="$HOME/bin"
 export GITHOME="$HOME/Documents/GIT"
-export SPLASH_SCREEN="${files[RANDOM % ${#files[@]}]}"
+export SPLASH_SCREEN="${splash_files[RANDOM % ${#splash_files[@]}]}"
 export GOPATH="${HOME}/.go"
 export GOROOT="$(brew --prefix golang)/libexec"
 export SNAPBIN="/snap/bin"
@@ -168,6 +172,16 @@ if [ -x "$(command -v dust)" ]; then
   alias du='dust -n 100'
 fi
 
+alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude walkerlee/claude-monitor'
+
+function znt() {
+  cwd="${HOME}"
+  if [[ -n $1 && -d "${GITHOME}/${1}" ]]; then
+    cwd="${GITHOME}/${1}"
+  fi
+  zellij action new-tab --name "$2" --cwd "${cwd}" -l compact
+}
+
 function udm() {
   if [ -f "yarn.lock" ]; then
     yarn "$@"
@@ -177,7 +191,7 @@ function udm() {
 }
 
 function weather(){
-   curl https://wttr.in/${@:-<Morgantown_WV>}
+   curl "https://wttr.in/${*:-Morgantown_WV}"
 }
 
 function weather2(){
@@ -185,7 +199,7 @@ function weather2(){
   while true
   do
     clear
-    curl https://wttr.in/${@:-<Morgantown_WV>}?1Fu
+    curl "https://wttr.in/${*:-Morgantown_WV}?1Fu"
     sleep 600
   done
 }
@@ -245,7 +259,9 @@ function trim_newline_from_eof {
 ###############################################################################
 # Splash Screen
 
-cat "$SPLASH_SCREEN"
+if [[ "$TERM_PROGRAM" != "WarpTerminal" ]]; then
+    cat "$SPLASH_SCREEN"
+fi
 
 ###############################################################################
 # Setup cat
@@ -259,79 +275,82 @@ function _cat() {
     cat "$@"
   fi
 }
-alias cat="_cat $@"
+alias cat="_cat"
 
 ###############################################################################
 # Prompt
 
-LIGHT_BLUE="\\[\\033[0;34m\\]"
-CYAN_BOLD="\\[\\033[1;36m\\]"
-NO_COLOUR="\\[\\033[0m\\]"
-GREEN="\\[\\033[1;32m\\]"
-CYAN="\\[\\033[0;36m\\]"
-RED="\\[\\033[1;31m\\]"
-YELLOW="\\[\\033[1;33m\\]"
 
-EXIT_SMILEY=":-/"
+  LIGHT_BLUE="\\[\\033[0;34m\\]"
+  CYAN_BOLD="\\[\\033[1;36m\\]"
+  NO_COLOUR="\\[\\033[0m\\]"
+  GREEN="\\[\\033[1;32m\\]"
+  CYAN="\\[\\033[0;36m\\]"
+  RED="\\[\\033[1;31m\\]"
+  YELLOW="\\[\\033[1;33m\\]"
 
-GITCOLOR=$YELLOW
+  EXIT_SMILEY=":-/"
 
-function prompt {
-  EXIT_STATUS=$?
+  GITCOLOR=$YELLOW
 
-  # for `hstr`
-  history -a # Append history lines from the current session to the history file
-  history -n # Read the history file into memory
+  function prompt {
+    EXIT_STATUS=$?
 
-  TERMWIDTH=${COLUMNS}
+    # for `hstr`
+    history -a # Append history lines from the current session to the history file
+    history -n # Read the history file into memory
 
-  usernam=$(whoami)
+    TERMWIDTH=${COLUMNS}
 
-  newPWD="${PWD}"
-  newPWD="$(echo -n "${PWD}" | sed -e "s|$HOME|\\~|")"
+    usernam=$(whoami)
 
-  pwdSurroundColor=$LIGHT_BLUE
-  if [[ ! -w ${PWD} ]]; then
-    pwdSurroundColor=$RED
-  fi
+    newPWD="${PWD}"
+    newPWD="$(echo -n "${PWD}" | sed -e "s|$HOME|\\~|")"
 
-  gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
-  if [[ -z $gitBranch ]]; then
-    gitBranch=$(date +%H:%M);
-    GITCOLOR=$CYAN;
-  else
-    GITCOLOR=$YELLOW;
-  fi
+    pwdSurroundColor=$LIGHT_BLUE
+    if [[ ! -w ${PWD} ]]; then
+      pwdSurroundColor=$RED
+    fi
 
-  gitDirty=$(git status --porcelain 2> /dev/null)
-  if [[ -n $gitDirty ]]; then
-    GITCOLOR=$RED;
-  fi
+    gitBranch=$(git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
+    if [[ -z $gitBranch ]]; then
+      gitBranch=$(date +%H:%M);
+      GITCOLOR=$CYAN;
+    else
+      GITCOLOR=$YELLOW;
+    fi
 
-  (( promptsize=$(echo -n "--(${usernam}@${newPWD})---(${gitBranch})--" | wc -c | tr -d " ") ))
-  (( fillsize=TERMWIDTH-promptsize ))
+    gitDirty=$(git status --porcelain 2> /dev/null)
+    if [[ -n $gitDirty ]]; then
+      GITCOLOR=$RED;
+    fi
 
-  fill=""
-  while [[ $fillsize -gt 0 ]]; do
-    fill="${fill}-===--===-"
-    (( fillsize=fillsize-10 ))
-  done
+    (( promptsize=$(echo -n "--(${usernam}@${newPWD})---(${gitBranch})--" | wc -c | tr -d " ") ))
+    (( fillsize=TERMWIDTH-promptsize ))
 
-  if [[ $fillsize -lt 0 ]]; then
-    (( cut=0-fillsize ))
-    fill="$(echo -n $fill | sed -e "s/\\(^.\\{$cut\\}\\)\\(.*\\)/\\2/")"
-  fi
+    fill=""
+    while [[ $fillsize -gt 0 ]]; do
+      fill="${fill}-===--===-"
+      (( fillsize=fillsize-10 ))
+    done
 
-  if [[ $EXIT_STATUS -ne 0 ]]; then
-    EXIT_SMILEY="$RED:("
-  else
-    EXIT_SMILEY="$GREEN:)"
-  fi
+    if [[ $fillsize -lt 0 ]]; then
+      (( cut=0-fillsize ))
+      fill="$(echo -n $fill | sed -e "s/\\(^.\\{$cut\\}\\)\\(.*\\)/\\2/")"
+    fi
 
-  PS1="$CYAN_BOLD-$pwdSurroundColor-($CYAN\${usernam}$LIGHT_BLUE@$CYAN\${newPWD}${pwdSurroundColor})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-($GITCOLOR\${gitBranch}$LIGHT_BLUE)-$CYAN_BOLD-\\n$CYAN_BOLD-$LIGHT_BLUE-($CYAN$EXIT_SMILEY$LIGHT_BLUE)-$CYAN_BOLD-:$NO_COLOUR "
+    if [[ $EXIT_STATUS -ne 0 ]]; then
+      EXIT_SMILEY="$RED:("
+    else
+      EXIT_SMILEY="$GREEN:)"
+    fi
+
+    PS1="$CYAN_BOLD-$pwdSurroundColor-($CYAN\${usernam}$LIGHT_BLUE@$CYAN\${newPWD}${pwdSurroundColor})-${CYAN_BOLD}-\${fill}${LIGHT_BLUE}-($GITCOLOR\${gitBranch}$LIGHT_BLUE)-$CYAN_BOLD-\\n$CYAN_BOLD-$LIGHT_BLUE-($CYAN$EXIT_SMILEY$LIGHT_BLUE)-$CYAN_BOLD-:$NO_COLOUR "
 }
 
-PROMPT_COMMAND=prompt
+if [[ "$TERM_PROGRAM" != "WarpTerminal" ]]; then
+  PROMPT_COMMAND=prompt
+fi
 
 # Setup hstr
 # Bind `hstr` to Ctrl+r, if this is interactive shell,
@@ -360,9 +379,10 @@ function _autoComplete_cdgit() {
     local cur
     cur=${COMP_WORDS[COMP_CWORD]}
     #@ TODO variable
-    COMPREPLY=( $(compgen -W "$(\ls $GITHOME/)" -- "$cur") )
+    COMPREPLY=( $(compgen -W "$(\ls "$GITHOME"/)" -- "$cur") )
 }
 complete -F _autoComplete_cdgit cdgit
+complete -F _autoComplete_cdgit znt
 
 # yarn <tab> : Lists commands from `node_modules/.bin`
 # yarn run <tab> : Scripts from package.json (correctly handles `:` in script names)
@@ -430,6 +450,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [[ -f .nvmrc && -z "$NVM_USED" ]]; then
+  # If .nvmrc exists in the directory where the shell opens
+  nvm use
+fi
 
 if [ -f "$HOME/.local_profile" ]; then
   # shellcheck source=/dev/null
@@ -440,7 +464,7 @@ fi
 #  tmux
 # fi
 
-if [[ -z "$ZELLIJ" ]] && ! [[ "$TERM_PROGRAM" = "vscode" ]]; then
+if [[ -z "$ZELLIJ" ]] && ! [[ "$TERM_PROGRAM" = "vscode" ]] && ! [[ "$TERM_PROGRAM" = "WarpTerminal" ]]; then
   if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then
     zellij attach -c
   else
@@ -459,8 +483,8 @@ fi
 # bash completion for python invoke
 _complete_invoke() {
     local candidates
-    candidates=`invoke --complete -- ${COMP_WORDS[*]}`
-    COMPREPLY=( $(compgen -W "${candidates}" -- $2) )
+    candidates=$(invoke --complete -- "${COMP_WORDS[*]}")
+    COMPREPLY=( $(compgen -W "${candidates}" -- "$2") )
 }
 complete -F _complete_invoke -o default invoke inv
 
@@ -489,3 +513,9 @@ fi
 if [[ -x $(command -v just) ]]; then
   eval "$(just --completions bash)"
 fi
+
+PATH="/Users/apfm/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/Users/apfm/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/Users/apfm/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/Users/apfm/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/Users/apfm/perl5"; export PERL_MM_OPT;
