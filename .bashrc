@@ -20,7 +20,6 @@
 # yarn <tab> : completes programs in node_modules/.bin
 # yarn run <tab> : completes scripts defined in package.json
 #
-# Runs tmux automatically
 # Runs lsd or exa instead of ls, if available. Defines sane color defaults
 # Maps Ctrl+R to hstr (replaces default history search)
 # * Removes per session history for terminals
@@ -139,9 +138,6 @@ case $OSTYPE in
       alias top='htop'
     fi
 
-    # Load tmux with linux config
-    alias tmux="tmux -f ~/.tmux/configs/tmux.linux.conf"
-
     # Alias to run GUI apps with `sudo` in Wayload
     alias allowGuiAsRoot="xhost +si:localuser:root > /dev/null"
     ;;
@@ -156,9 +152,6 @@ case $OSTYPE in
 
     # Filemerge tool
     alias filemerge="open /Applications/Xcode.app/Contents/Applications/FileMerge.app/"
-
-    # Load tmux with Mac config
-    alias tmux="tmux -f ~/.tmux/configs/tmux.macos.conf"
     ;;
   *) ;;
 esac
@@ -340,7 +333,7 @@ if [ -x "$(command -v flutter)" ]; then
   eval "$(flutter bash-completion)"
 fi
 
-# Adds in a ton of autocompletes for bash
+# Adds in autocompletes for bash
 if [[ -f $LOCALBIN/bash_completion ]]; then
   # shellcheck source=/dev/null
   source "$LOCALBIN/bash_completion"
@@ -355,10 +348,6 @@ if [ -f "$HOME/.local_profile" ]; then
   # shellcheck source=/dev/null
   source "$HOME/.local_profile"
 fi
-
-# if ! [[ "$TERM" = "screen-256color" ]] && ! [[ -n "$TMUX" ]] || [[ "$TERM_PROGRAM" = "vscode" ]]; then
-#  tmux
-# fi
 
 if [[ -z "$ZELLIJ" ]] && ! [[ "$TERM_PROGRAM" = "vscode" ]] && ! [[ "$TERM_PROGRAM" = "WarpTerminal" ]]; then
   if [[ "$ZELLIJ_AUTO_ATTACH" == "true" ]]; then

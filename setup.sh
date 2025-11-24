@@ -41,7 +41,6 @@ declare -a arr=(
     "wget"
     "yarn"
     "zellij"
-    "tmux"
 )
 
 for i in "${arr[@]}"
