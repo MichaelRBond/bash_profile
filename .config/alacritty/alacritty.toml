@@ -48,3 +48,9 @@ hide_when_typing = false
 key = "Return"
 mods = "Shift"
 chars = "\n"
+
+# Don't open a new window with cmd+t
+[[keyboard.bindings]]
+key = "T"
+mods = "Command"
+action = "None"

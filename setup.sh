@@ -9,8 +9,10 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 declare -a arr=(
     "alacritty"
     "awscli"
+    "aws-sam-cli"
     "bash"
     "bash-completion"
+    "bat"
     "difftastic"
     "direnv"
     "duf"
@@ -25,6 +27,7 @@ declare -a arr=(
     "just"
     "lazygit"
     "lsd"
+    "mdcat"
     "midnight-commander"
     "pnpm"
     "pyenv"
@@ -39,7 +42,6 @@ declare -a arr=(
     "tmux"
 )
 
-## now loop through the above array
 for i in "${arr[@]}"
 do
    brew list "${i}" > /dev/null 2>&1 || brew install ${i}
