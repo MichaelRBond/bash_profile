@@ -13,6 +13,8 @@ declare -a arr=(
     "bash"
     "bash-completion"
     "bat"
+    "claude"
+    "codex"
     "difftastic"
     "direnv"
     "duf"
@@ -39,7 +41,6 @@ declare -a arr=(
     "wget"
     "yarn"
     "zellij"
-    "tmux"
 )
 
 for i in "${arr[@]}"
@@ -66,9 +67,12 @@ else
     git pull
 fi
 
+mkdir -p "${HOME}/.config"
+
 rm -rf "${HOME}/.bash_profile"
 rm -rf "${HOME}/.bashrc"
 rm -rf "${HOME}/.splashes"
+# Note: Default Safety check here so we don't accidentally nuke `/bin`
 rm -rf "${HOME:?}/bin"
 rm -rf "${HOME}/.config/alacritty"
 rm -rf "${HOME}/.config/zellij"
@@ -78,6 +82,7 @@ ln -s "${GIT_BASH_PROFILE}/.splashes" "${HOME}/.splashes"
 ln -s "${GIT_BASH_PROFILE}/bin" "${HOME}/bin"
 ln -s "${GIT_BASH_PROFILE}/.config/alacritty" "${HOME}/.config/alacritty"
 ln -s "${GIT_BASH_PROFILE}/.config/zellij" "${HOME}/.config/zellij"
+ln -s "${GIT_BASH_PROFILE}/.config/bashrc" "${HOME}/.config/bashrc"
 
 # Setup bash
 if [ -z $(grep "/opt/homebrew/bin/bash" /etc/shells) ]; then
