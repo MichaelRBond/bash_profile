@@ -400,4 +400,3 @@ _autoComplete_cdgit() {
 # Rebind
 complete -r cdgit 2>/dev/null
 complete -F _autoComplete_cdgit cdgit
-complete -F _autoComplete_cdgit znt
