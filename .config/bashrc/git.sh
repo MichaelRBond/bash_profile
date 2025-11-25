@@ -108,13 +108,24 @@ _gitproj_list_projects() {
 }
 
 _gitproj_list_worktrees() {
-  local project="$1" wtdir; wtdir="$(_gitproj_wtdir "$project")"
-  [[ -d "$wtdir" ]] || return 0
-  local wt
-  for wt in "$wtdir"/*; do
-    [[ -d "$wt" ]] || continue
-    printf '%s\n' "$(basename "$wt")"
-  done
+  local project="$1"
+  local clone; clone="$(_gitproj_clone "$project")"
+  local wtdir; wtdir="$(_gitproj_wtdir "$project")"
+
+  # Return empty if clone doesn't exist
+  [[ -d "$clone/.git" ]] || return 0
+
+  # Use git worktree list to find all registered worktrees under .worktrees/
+  git -C "$clone" worktree list --porcelain 2>/dev/null | \
+    awk -v wtdir="$wtdir/" '
+      /^worktree / {
+        path = substr($0, 10)
+        if (index(path, wtdir) == 1) {
+          relpath = substr(path, length(wtdir) + 1)
+          if (relpath != "") print relpath
+        }
+      }
+    '
 }
 
 _gitproj_list_branches() {
@@ -371,18 +382,11 @@ _autoComplete_cdgit() {
     local suffix="${token#*:}"
     local wtdir="$GITHOME/$project/${project}.worktrees"
 
-    # Collect worktree names from $GITHOME/project/project.worktrees/*
-    local wts=()
-    if [[ -d "$wtdir" ]]; then
-      local wt
-      for wt in "$wtdir"/*; do
-        [[ -d "$wt" ]] || continue
-        wts+=( "$(basename "$wt")" )
-      done
-    fi
+    # Collect worktree names using helper (supports nested paths)
+    local wts
+    wts=( $(_gitproj_list_worktrees "$project") )
 
-    # If ":" is a wordbreak, Bash will keep "project:" and insert our suffix,
-    # so return only the suffix matches.
+    # Match against suffix only - bash handles colon as word boundary
     COMPREPLY=( $(compgen -W "${wts[*]}" -- "$suffix") )
     return
   fi
@@ -397,6 +401,6 @@ _autoComplete_cdgit() {
   COMPREPLY=( $(compgen -W "${projects[*]}" -- "$cur") )
 }
 
-# Rebind
+# Rebind with -o nospace to prevent space after project name
 complete -r cdgit 2>/dev/null
-complete -F _autoComplete_cdgit cdgit
+complete -o nospace -F _autoComplete_cdgit cdgit
