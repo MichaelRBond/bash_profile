@@ -66,6 +66,10 @@ if [ -f "$HOME/.config/bashrc/znt.sh" ]; then
   source "$HOME/.config/bashrc/znt.sh"
 fi
 
+if [ -f "$HOME/.config/bashrc/ai.sh" ]; then
+  source "$HOME/.config/bashrc/ai.sh"
+fi
+
 # Setup Path
 
 mkdir -p "${HOME}/.local/bin"
