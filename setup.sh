@@ -7,7 +7,8 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 declare -a arr=(
-    "alacritty"
+    # Alacritty has been removed due to not being signed.
+    # "alacritty"
     "awscli"
     "aws-sam-cli"
     "bash"
@@ -76,6 +77,7 @@ rm -rf "${HOME}/.splashes"
 rm -rf "${HOME:?}/bin"
 rm -rf "${HOME}/.config/alacritty"
 rm -rf "${HOME}/.config/zellij"
+rm -rf "${HOME}/.config/bashrc"
 ln -s "${GIT_BASH_PROFILE}/.bash_profile" "${HOME}/.bash_profile"
 ln -s "${GIT_BASH_PROFILE}/.bashrc" "${HOME}/.bashrc"
 ln -s "${GIT_BASH_PROFILE}/.splashes" "${HOME}/.splashes"
@@ -83,6 +85,10 @@ ln -s "${GIT_BASH_PROFILE}/bin" "${HOME}/bin"
 ln -s "${GIT_BASH_PROFILE}/.config/alacritty" "${HOME}/.config/alacritty"
 ln -s "${GIT_BASH_PROFILE}/.config/zellij" "${HOME}/.config/zellij"
 ln -s "${GIT_BASH_PROFILE}/.config/bashrc" "${HOME}/.config/bashrc"
+# Note: Lazygit default to using the application support directory on macOS
+rm -rf "${HOME}/Library/Application Support/lazygit"
+mkdir -p "${HOME}/Library/Application Support/lazygit"
+ln -s "${GIT_BASH_PROFILE}/lazygit/config.yml" "${HOME}/Library/Application Support/lazygit/config.yml"
 
 # Setup bash
 if [ -z $(grep "/opt/homebrew/bin/bash" /etc/shells) ]; then

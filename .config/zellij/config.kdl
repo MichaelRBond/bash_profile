@@ -13,6 +13,8 @@ keybinds {
       bind "Alt Up" { MoveFocus "Up"; }
       bind "Alt Down" { MoveFocus "Down"; }
 
+      bind "Ctrl w" { ToggleFloatingPanes; SwitchToMode "Normal"; }
+
       // switch between tabs
       bind "Ctrl Left" { GoToPreviousTab; }
       bind "Ctrl Right" { GoToNextTab; }
