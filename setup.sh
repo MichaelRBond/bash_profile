@@ -22,6 +22,7 @@ declare -a arr=(
     "dust"
     "emacs"
     "git"
+    "git-delta"
     "gnupg"
     "gnutls"
     "grep"
