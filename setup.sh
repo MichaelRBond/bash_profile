@@ -7,8 +7,8 @@ fi
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 declare -a arr=(
-    # Alacritty has been removed due to not being signed.
-    # "alacritty"
+    "richhaase/tap/acr"
+    # "alacritty" # Alacritty has been removed due to not being signed.
     "awscli"
     "aws-sam-cli"
     "bash"
@@ -26,6 +26,7 @@ declare -a arr=(
     "gnupg"
     "gnutls"
     "grep"
+    "helix"
     "hstr"
     "jq"
     "just"
