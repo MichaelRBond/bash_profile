@@ -50,7 +50,7 @@ splash_files=("$HOME"/.splashes/*)
 export LOCALBIN="$HOME/bin"
 export GITHOME="$HOME/Documents/GIT"
 export SPLASH_SCREEN="${splash_files[RANDOM % ${#splash_files[@]}]}"
-export GOROOT="/usr/local/go"
+# export GOROOT="/usr/local/go"
 export SNAPBIN="/snap/bin"
 export EXA_COLORS="ex=0;0;31:di=0;0;34:da=0;0;37:*.pdf=0;0;33:*.doc=0;0;33:*.docx=0;0;33:*.xls=0;0;33:*.xlsx=0;0;33:*.ppt=0;0;33:*.pptx=0;0;33:*.dot=0;0;33:*.wpd=0;0;33:*.wps=0;0;33:*.sdw=0;0;33:*.odt=0;0;33:*.ods=0;0;33:*.odg=0;0;33:*.odp=0;0;33:*.odf=0;0;33:*.odb=0;0;33:*.oxt=0;0;33:*.eml=0;0;37:*.zip=38;5;205:*.gz=38;5;205:*.tar=38;5;205:*.dmg=38;5;205:*.rar=38;5;205:*.tgz=38;5;205:.java=38;5;45:*.kt;0;0;37:*.c=38;5;45:*.cpp=38;5;45:*.h=38;5;45:*.js=38;5;45:*.jsx=38;5;45:*.ts=38;5;45:*.tsx=38;5;45:*.rb=38;5;45:*.pl=38;5;45:*.py=38;5;45:*.go=38;5;45:*.php=38;5;45:*.sh=38;5;45:*.bat=38;5;45:*.lua=38;5;45:*.swift=38;5;45:*.xsl=38;5;45:*.d=38;5;45:*.tcl=38;5;45:*.pas=38;5;45:*.vbs=38;5;45:*.groovy=38;5;45:*.lsp=38;5;45:*.ps1=38;5;45:*.bcc=38;5;45:*.rs=38;5;45:*.html=38;5;121:*.css=38;5;121:*.less=38;5;121:*.sass=38;5;121:*.xhtml=38;5;43:*.htm=38;5;121:*.mustache=38;5;121:*.json=38;5;85:*.sql=38;5;85:*.eml=38;5;85:*.csv=38;5;85:*.xml=38;5;85:*.yml=38;5;85:*.yaml=38;5;85"
 export LS_COLORS="ex=0;0;31:di=0;0;34:da=0;0;37:*.pdf=0;0;33:*.doc=0;0;33:*.docx=0;0;33:*.xls=0;0;33:*.xlsx=0;0;33:*.ppt=0;0;33:*.pptx=0;0;33:*.dot=0;0;33:*.wpd=0;0;33:*.wps=0;0;33:*.sdw=0;0;33:*.odt=0;0;33:*.ods=0;0;33:*.odg=0;0;33:*.odp=0;0;33:*.odf=0;0;33:*.odb=0;0;33:*.oxt=0;0;33:*.eml=0;0;37:*.zip=38;5;205:*.gz=38;5;205:*.tar=38;5;205:*.dmg=38;5;205:*.rar=38;5;205:*.tgz=38;5;205:.java=38;5;45:*.kt;0;0;37:*.c=38;5;45:*.cpp=38;5;45:*.h=38;5;45:*.js=38;5;45:*.jsx=38;5;45:*.ts=38;5;45:*.tsx=38;5;45:*.rb=38;5;45:*.pl=38;5;45:*.py=38;5;45:*.go=38;5;45:*.php=38;5;45:*.sh=38;5;45:*.bat=38;5;45:*.lua=38;5;45:*.swift=38;5;45:*.xsl=38;5;45:*.d=38;5;45:*.tcl=38;5;45:*.pas=38;5;45:*.vbs=38;5;45:*.groovy=38;5;45:*.lsp=38;5;45:*.ps1=38;5;45:*.bcc=38;5;45:*.rs=38;5;45:*.html=38;5;121:*.css=38;5;121:*.less=38;5;121:*.sass=38;5;121:*.xhtml=38;5;43:*.htm=38;5;121:*.mustache=38;5;121:*.json=38;5;85:*.sql=38;5;85:*.eml=38;5;85:*.csv=38;5;85:*.xml=38;5;85:*.yml=38;5;85:*.yaml=38;5;85"
@@ -82,12 +82,16 @@ if [[ -d "$HOME/.cargo/bin" ]]; then
   PATH="$PATH:$HOME/.cargo/bin"
 fi
 
-if [[ -d "$GOROOT/bin" ]]; then
-  PATH="$PATH:${GOROOT}/bin"
-fi
+# if [[ -d "$GOROOT/bin" ]]; then
+#   PATH="$PATH:${GOROOT}/bin"
+# fi
 
 if [[ -d "$LOCALBIN/flutter/bin" ]]; then
   PATH="$PATH:$LOCALBIN/flutter/bin"
+fi
+
+if [ -x "$(command -v go)" ]; then
+  PATH="$(go env GOPATH)/bin:$PATH"
 fi
 
 export PATH
@@ -119,6 +123,27 @@ fi
 
 ###############################################################################
 # Aliases
+
+alias c='code'
+alias dcu='docker compose up'
+alias dcud='docker compose up -d'
+alias dcd='docker compose down'
+
+#Agntic Code Review Alias
+# ... for codex
+alias acr-codex='acr --reviewers 10 --base master --local'
+
+# ... for Cluade
+alias acr-claude='acr --reviewer-agent claude --reviewer-model claude-opus-4-6 --summarizer-agent claude --summarizer-model claude-haiku-4-5 --reviewers 5 --base master --local'
+
+# AWS
+aws-dummy-creds() {
+  export AWS_ACCESS_KEY_ID=dummy
+  export AWS_SECRET_ACCESS_KEY=dummy
+  export AWS_SESSION_TOKEN=dummy
+  export AWS_DEFAULT_REGION=us-east-1
+  echo "Dummy AWS credentials exported for this shell"
+}
 
 # Silver Searcher searches hidden files
 alias ag='ag --hidden --ignore ".git"'
