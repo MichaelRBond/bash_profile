@@ -89,6 +89,40 @@ cdgit() {
   fi
 }
 export -f cdgit
+
+# ===== gc (git clone into worktree-style layout) =====
+gc() {
+  if [[ $# -lt 1 ]]; then
+    echo "Usage: gc <repo-url>" >&2
+    return 2
+  fi
+
+  local url="$1"
+
+  # Extract project name: strip trailing .git, then take last path component
+  local project="${url##*/}"
+  project="${project%.git}"
+
+  if [[ -z "$project" ]]; then
+    echo "gc: could not determine project name from '$url'" >&2
+    return 1
+  fi
+
+  local container="$GITHOME/$project"
+
+  if [[ -e "$container" ]]; then
+    echo "gc: directory already exists: $container" >&2
+    return 1
+  fi
+
+  mkdir -p "$container" || return 1
+  git clone "$url" "$container/$project" || { rm -rf "$container"; return 1; }
+
+  echo "✔ Cloned into worktree layout: $container/$project"
+  cdgit "$project"
+}
+export -f gc
+
 # ===== Shared helpers (DRY) =====
 _gitproj_clone()   { echo "$GITHOME/$1/$1"; }
 _gitproj_wtdir()   { echo "$GITHOME/$1/${1}.worktrees"; }
