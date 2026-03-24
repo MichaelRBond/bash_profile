@@ -19,6 +19,9 @@ bold_italic.family = "JetbrainsMono Nerd Font"
 
 size = 14
 
+[terminal]
+osc52 = "CopyPaste"
+
 [colors.normal]
 
 blue = "#6a84fb"
