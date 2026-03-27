@@ -552,6 +552,12 @@ default_layout "compact"
 //
 show_startup_tips false
 
+ui {
+    pane_frames {
+        hide_session_name true
+    }
+}
+
 // Whether to show release notes on first version run
 // Default: true
 //
