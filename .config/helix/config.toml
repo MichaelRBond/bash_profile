@@ -15,7 +15,8 @@ S-down = "extend_line_down"
 S-home = "extend_to_line_start"
 S-end = "extend_to_line_end"
 
-A-w = "@<space>w"
+A-w = "@<space>w" # open window commands (splits, etc)
+A-z = ":toggle-option soft-wrap.enable"
 
 [keys.insert]
 C-e = "goto_line_end"
@@ -31,9 +32,22 @@ S-end = "extend_to_line_end"
 C-y = [":clipboard-yank"]
 
 A-w = "@<esc><space>w"
+A-z = ":toggle-option soft-wrap.enable"
 
 [editor]
 clipboard-provider = "termcode"
 insert-final-newline = true
 trim-final-newlines = true
 trim-trailing-whitespace = true
+
+[editor.file-picker]
+hidden = true
+ignore = true
+git-ignore = true
+git-global = true
+git-exclude = true
+
+[editor.soft-wrap]
+enable = true
+max-wrap = 25
+wrap-indicator = ""
