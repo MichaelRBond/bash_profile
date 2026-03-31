@@ -6,7 +6,48 @@ C-e = "goto_line_end"
 C-a = "goto_line_start"
 C-A-left = "move_prev_word_start"
 C-A-right = "move_next_word_end"
+C-k = "kill_to_line_end"
+"C-/" = "toggle_comments"
+S-left = "extend_char_left"
+S-right = "extend_char_right"
+S-up = "extend_line_up"
+S-down = "extend_line_down"
+S-home = "extend_to_line_start"
+S-end = "extend_to_line_end"
+
+A-w = "@<space>w" # open window commands (splits, etc)
+A-z = ":toggle-option soft-wrap.enable"
 
 [keys.insert]
 C-e = "goto_line_end"
 C-a = "goto_line_start"
+C-k = "kill_to_line_end"
+"C-/" = "toggle_comments"
+S-left = "extend_char_left"
+S-right = "extend_char_right"
+S-up = "extend_line_up"
+S-down = "extend_line_down"
+S-home = "extend_to_line_start"
+S-end = "extend_to_line_end"
+C-y = [":clipboard-yank"]
+
+A-w = "@<esc><space>w"
+A-z = ":toggle-option soft-wrap.enable"
+
+[editor]
+clipboard-provider = "termcode"
+insert-final-newline = true
+trim-final-newlines = true
+trim-trailing-whitespace = true
+
+[editor.file-picker]
+hidden = true
+ignore = true
+git-ignore = true
+git-global = true
+git-exclude = true
+
+[editor.soft-wrap]
+enable = true
+max-wrap = 25
+wrap-indicator = ""
