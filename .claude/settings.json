@@ -1,4 +1,9 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(obsidian *)"
+    ]
+  },
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
     "pr-review-toolkit@claude-plugins-official": true,
