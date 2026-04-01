@@ -90,6 +90,10 @@ if [[ -d "$LOCALBIN/flutter/bin" ]]; then
   PATH="$PATH:$LOCALBIN/flutter/bin"
 fi
 
+if [[ -d "/Applications/Obsidian.app/Contents/MacOS" ]]; then
+  PATH="$PATH:/Applications/Obsidian.app/Contents/MacOS"
+fi
+
 if [ -x "$(command -v go)" ]; then
   PATH="$(go env GOPATH)/bin:$PATH"
 fi
