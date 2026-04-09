@@ -204,7 +204,7 @@ if [ -x "$(command -v dust)" ]; then
   alias du='dust -n 100'
 fi
 
-alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude walkerlee/claude-monitor'
+alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude -e TZ=America/New_York claude-monitor'
 
 # make man pages colorful
 function _colorman() {

@@ -15,6 +15,10 @@ S-down = "extend_line_down"
 S-home = "extend_to_line_start"
 S-end = "extend_to_line_end"
 "Cmd-a" = "select_all"
+"Cmd-up" = "page_up"
+"Cmd-down" = "page_down"
+"Cmd-A-up" = "goto_file_start"
+"Cmd-A-down" = "goto_file_end"
 
 A-w = "@<space>w" # open window commands (splits, etc)
 A-z = ":toggle-option soft-wrap.enable"
@@ -34,6 +38,10 @@ S-home = "extend_to_line_start"
 S-end = "extend_to_line_end"
 C-y = [":clipboard-yank"]
 "Cmd-a" = "select_all"
+"Cmd-up" = "page_up"
+"Cmd-down" = "page_down"
+"Cmd-A-up" = "goto_file_start"
+"Cmd-A-down" = "goto_file_end"
 
 A-w = "@<esc><space>w"
 A-z = ":toggle-option soft-wrap.enable"
