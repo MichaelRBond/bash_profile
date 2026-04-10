@@ -94,7 +94,7 @@ Run ACR locally against the PR:
 acr --pr <pr_number> --local --reviewer-agent claude --reviewers 5 --verbose 2>&1 | tee /tmp/acr-pr-<pr_number>.txt
 ```
 
-If ACR exits with code 0 (no findings), skip to Step 6 with an "LGTM" review.
+If ACR exits with code 0 (no findings), the PR is clean. **Do NOT perform your own independent review.** Skip directly to Step 6 and present a short "LGTM" verdict. Do not read the diff, do not look for issues, do not add your own findings — just LGTM and clean up.
 
 ---
 
