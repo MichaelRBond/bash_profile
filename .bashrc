@@ -138,6 +138,7 @@ alias dcd='docker compose down'
 alias acr-codex='acr --reviewers 10 --base master --local'
 
 # ... for Cluade
+alias claude='claude --enable-auto-mode'
 alias acr-claude='acr --reviewer-agent claude --reviewer-model claude-opus-4-6 --summarizer-agent claude --summarizer-model claude-haiku-4-5 --reviewers 5 --base master --local'
 
 # AWS
@@ -203,7 +204,7 @@ if [ -x "$(command -v dust)" ]; then
   alias du='dust -n 100'
 fi
 
-alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude walkerlee/claude-monitor'
+alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude -e TZ=America/New_York claude-monitor'
 
 # make man pages colorful
 function _colorman() {
