@@ -45,6 +45,13 @@ if [ -f /etc/bashrc ]; then
 	source /etc/bashrc
 fi
 
+# Load local, machine-specific profile early so its variables
+# (e.g. AWS_ACCOUNTS) are available to everything sourced below.
+if [ -f "$HOME/.local_profile" ]; then
+  # shellcheck source=/dev/null
+  source "$HOME/.local_profile"
+fi
+
 splash_files=("$HOME"/.splashes/*)
 
 export LOCALBIN="$HOME/bin"
@@ -54,20 +61,6 @@ export SPLASH_SCREEN="${splash_files[RANDOM % ${#splash_files[@]}]}"
 export SNAPBIN="/snap/bin"
 export EXA_COLORS="ex=0;0;31:di=0;0;34:da=0;0;37:*.pdf=0;0;33:*.doc=0;0;33:*.docx=0;0;33:*.xls=0;0;33:*.xlsx=0;0;33:*.ppt=0;0;33:*.pptx=0;0;33:*.dot=0;0;33:*.wpd=0;0;33:*.wps=0;0;33:*.sdw=0;0;33:*.odt=0;0;33:*.ods=0;0;33:*.odg=0;0;33:*.odp=0;0;33:*.odf=0;0;33:*.odb=0;0;33:*.oxt=0;0;33:*.eml=0;0;37:*.zip=38;5;205:*.gz=38;5;205:*.tar=38;5;205:*.dmg=38;5;205:*.rar=38;5;205:*.tgz=38;5;205:.java=38;5;45:*.kt;0;0;37:*.c=38;5;45:*.cpp=38;5;45:*.h=38;5;45:*.js=38;5;45:*.jsx=38;5;45:*.ts=38;5;45:*.tsx=38;5;45:*.rb=38;5;45:*.pl=38;5;45:*.py=38;5;45:*.go=38;5;45:*.php=38;5;45:*.sh=38;5;45:*.bat=38;5;45:*.lua=38;5;45:*.swift=38;5;45:*.xsl=38;5;45:*.d=38;5;45:*.tcl=38;5;45:*.pas=38;5;45:*.vbs=38;5;45:*.groovy=38;5;45:*.lsp=38;5;45:*.ps1=38;5;45:*.bcc=38;5;45:*.rs=38;5;45:*.html=38;5;121:*.css=38;5;121:*.less=38;5;121:*.sass=38;5;121:*.xhtml=38;5;43:*.htm=38;5;121:*.mustache=38;5;121:*.json=38;5;85:*.sql=38;5;85:*.eml=38;5;85:*.csv=38;5;85:*.xml=38;5;85:*.yml=38;5;85:*.yaml=38;5;85"
 export LS_COLORS="ex=0;0;31:di=0;0;34:da=0;0;37:*.pdf=0;0;33:*.doc=0;0;33:*.docx=0;0;33:*.xls=0;0;33:*.xlsx=0;0;33:*.ppt=0;0;33:*.pptx=0;0;33:*.dot=0;0;33:*.wpd=0;0;33:*.wps=0;0;33:*.sdw=0;0;33:*.odt=0;0;33:*.ods=0;0;33:*.odg=0;0;33:*.odp=0;0;33:*.odf=0;0;33:*.odb=0;0;33:*.oxt=0;0;33:*.eml=0;0;37:*.zip=38;5;205:*.gz=38;5;205:*.tar=38;5;205:*.dmg=38;5;205:*.rar=38;5;205:*.tgz=38;5;205:.java=38;5;45:*.kt;0;0;37:*.c=38;5;45:*.cpp=38;5;45:*.h=38;5;45:*.js=38;5;45:*.jsx=38;5;45:*.ts=38;5;45:*.tsx=38;5;45:*.rb=38;5;45:*.pl=38;5;45:*.py=38;5;45:*.go=38;5;45:*.php=38;5;45:*.sh=38;5;45:*.bat=38;5;45:*.lua=38;5;45:*.swift=38;5;45:*.xsl=38;5;45:*.d=38;5;45:*.tcl=38;5;45:*.pas=38;5;45:*.vbs=38;5;45:*.groovy=38;5;45:*.lsp=38;5;45:*.ps1=38;5;45:*.bcc=38;5;45:*.rs=38;5;45:*.html=38;5;121:*.css=38;5;121:*.less=38;5;121:*.sass=38;5;121:*.xhtml=38;5;43:*.htm=38;5;121:*.mustache=38;5;121:*.json=38;5;85:*.sql=38;5;85:*.eml=38;5;85:*.csv=38;5;85:*.xml=38;5;85:*.yml=38;5;85:*.yaml=38;5;85"
-
-# Source git-related functions
-if [ -f "$HOME/.config/bashrc/git.sh" ]; then
-  source "$HOME/.config/bashrc/git.sh"
-fi
-
-# Source znt (Zellij new tab function)
-if [ -f "$HOME/.config/bashrc/znt.sh" ]; then
-  source "$HOME/.config/bashrc/znt.sh"
-fi
-
-if [ -f "$HOME/.config/bashrc/ai.sh" ]; then
-  source "$HOME/.config/bashrc/ai.sh"
-fi
 
 # Setup Path
 
@@ -204,7 +197,7 @@ if [ -x "$(command -v dust)" ]; then
   alias du='dust -n 100'
 fi
 
-alias claude-monitor='docker run --rm -it -v $HOME/.claude:/root/.claude -e TZ=America/New_York claude-monitor'
+alias claude-monitor='docker run -it --rm -v "$HOME/.claude:/data/.claude:ro" -e CLAUDE_CONFIG_DIR=/data/.claude claude-code-usage-monitor:latest --timezone America/New_York'
 
 # make man pages colorful
 function _colorman() {
@@ -290,7 +283,7 @@ alias cat="_cat"
 
     TERMWIDTH=${COLUMNS}
 
-    usernam=$(whoami)
+    usernam=$(command whoami)
 
     newPWD="${PWD}"
     newPWD="$(echo -n "${PWD}" | sed -e "s|$HOME|\\~|")"
@@ -368,14 +361,23 @@ if [[ -f $LOCALBIN/bash_completion ]]; then
   source "$LOCALBIN/bash_completion"
 fi
 
-# Source node/npm package manager functions
-if [ -f "$HOME/.config/bashrc/node.sh" ]; then
-  source "$HOME/.config/bashrc/node.sh"
-fi
-
-if [ -f "$HOME/.local_profile" ]; then
-  # shellcheck source=/dev/null
-  source "$HOME/.local_profile"
+# Load all helper scripts from ~/.config/bashrc/ (ai.sh, git.sh, node.sh,
+# whoami.sh, znt.sh, ...). Sourced in alphabetical order, which keeps
+# inter-script deps happy (e.g. znt.sh uses _autoComplete_cdgit from git.sh).
+#
+# Placed *after* $LOCALBIN/bash_completion so node.sh's custom yarn/npm/pnpm
+# completions override any defaults that bash_completion may install. The
+# bash-completion helpers (_get_comp_words_by_ref, __ltrim_colon_completions,
+# _filedir) used inside those functions are only invoked at tab-time, so
+# strict load-order between bash_completion and registration isn't required —
+# the override behavior is.
+if [ -d "$HOME/.config/bashrc" ]; then
+  for _bashrc_file in "$HOME"/.config/bashrc/*.sh; do
+    [ -f "$_bashrc_file" ] || continue
+    # shellcheck source=/dev/null
+    source "$_bashrc_file"
+  done
+  unset _bashrc_file
 fi
 
 if [[ -z "$ZELLIJ" ]] && ! [[ "$TERM_PROGRAM" = "vscode" ]] && ! [[ "$TERM_PROGRAM" = "WarpTerminal" ]]; then

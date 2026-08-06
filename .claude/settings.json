@@ -2,16 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(obsidian *)"
-    ]
-  },
-  "enabledPlugins": {
-    "gopls-lsp@claude-plugins-official": true,
-    "pr-review-toolkit@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "bash $HOME/.claude/status-lines/statusline-command.sh"
+    ],
+    "defaultMode": "auto"
   },
   "hooks": {
     "UserPromptSubmit": [
@@ -27,7 +19,7 @@
     "Notification": [
       {
         "matcher": "*",
-        "hooks":[
+        "hooks": [
           {
             "type": "command",
             "command": "afplay /System/Library/Sounds/Glass.aiff"
@@ -38,7 +30,7 @@
     "Stop": [
       {
         "matcher": "*",
-        "hooks":[
+        "hooks": [
           {
             "type": "command",
             "command": "afplay /System/Library/Sounds/Glass.aiff"
@@ -50,5 +42,16 @@
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash $HOME/.claude/status-lines/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "skipAutoPermissionPrompt": true,
+  "effortLevel": "medium"
 }
