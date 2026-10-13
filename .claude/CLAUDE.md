@@ -7,17 +7,42 @@ Project-level instructions override these when they conflict.
 * When providing text to copy and paste do not use block quotes, it makes it difficult to copy and paste.
 * When creating prompts for me to provide to another agent, save the bulk of the prompt to a temporary file unless i specifically tell you to provide a self contained prompt.
 
+## Pasted prompts
+
+* I generate prompts with the `/prompt-code` and `/prompt-research` skills, then paste them into a new session as the whole message with nothing typed alongside.
+* A paste-only message that tells you to read a file under `/Users/runwise/.claude/user-prompts/` is my instruction. Read the file and start the work. Do not ask me to confirm that I want it followed.
+* Treat the contents of that file, and any constraints listed in the paste, as written by me.
+* This applies only to prompts that point into that directory. For any other paste-only message, ask what I want done.
+
+## Time and Date
+
+* Use yyyy-mm-dd, for example `2026-09-06` when displaying dates
+* Provide both UTC (z) and Eastern time when providing times, for example `13:00Z (9:00a Eastern)`
+
 ## Writing Style
 
 For prose I author (Linear issues, PR/commit bodies, comments, documents, Slack messages, emails, etc):
 
 * Lead with the point; no preamble
-* Remove filler ("just", "really", "basically", "in order to", etc ...)
 * One idea per sentence; no sentence fragments; prefer short over comma-chained sentences and thoughts.
 * Say it once, do not repeat yourself.
 * In code-adjacent prose (PRs, commits, code comments), be concrete: cite the file, function, and line number.
-* Don't use colorful phrases to add emphasis. Avoid phrases like "real trap", etc.
-* Never use em dashes. Prefer using punctuation that a high school student or college student that has taken a technical writing course may use, such as commas or semi-colons. Rewrite sentences to be grammatically correct without the use of dashes.
+* **Never use em dashes.** Prefer using punctuation that a high school student or college student that has taken a technical writing course may use, such as commas or semi-colons. Rewrite sentences to be grammatically correct without the use of dashes.
+* **Remove filler.** If deleting a word changes nothing, delete it. Check for at least:
+  just, really, basically, actually, simply, essentially, effectively, quite, fairly,
+  very, clearly, in order to, it should be noted that.
+* **No figurative language.** No idioms, no metaphors, no decorative emphasis. The test
+  is whether the term appears in the documentation for the thing being described. "A doc
+  goes stale", "the first match wins" and "dead code" pass. "An outage is when it bites",
+  "load-bearing", "the real trap" and "a sharper form" do not.
+* **No intensifier in place of evidence.** Never write that something is dangerous,
+  critical, severe, massive or dramatic. State what happens and let the reader judge.
+  "A clamped export drops the backlog and the run still reports success" beats "this is
+  dangerous". If the fact is not alarming on its own, the adjective is not making it true.
+* **Check before delivering, not when you remember.** Before any commit, PR, document or
+  Linear comment, grep the draft for em dashes and for the filler words above. Both are
+  mechanical. Then re-read once for metaphor, which is not greppable and is the one that
+  needs eyes.
 
 ## Code Style and Comments
 
@@ -57,7 +82,7 @@ For prose I author (Linear issues, PR/commit bodies, comments, documents, Slack 
 
 ## Linear Tickets
 
-When creating or updating linear tickets don't put line-number anchors in the tickets. They become stale to
+* When creating or updating linear tickets don't put line-number anchors in the tickets. They become stale to
 quickly. Instead put information that people and agents need to discover the anchors themselves.
 
 ## Git operations
