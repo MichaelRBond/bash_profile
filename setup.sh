@@ -96,30 +96,52 @@ mkdir -p "${HOME}/Library/Application Support/lazygit"
 ln -s "${GIT_BASH_PROFILE}/lazygit/config.yml" "${HOME}/Library/Application Support/lazygit/config.yml"
 
 # Setup Claude Code
-# Items are linked one at a time, and existing items are skipped, so locally installed
-# skills and local edits survive a re-run.
+# Items are linked one at a time. When a local item differs from the repo version, you are
+# asked whether to replace it. A replaced item is moved to CLAUDE_BACKUP, not deleted.
 CLAUDE_SOURCE="${GIT_BASH_PROFILE}/.claude"
 CLAUDE_HOME="${HOME}/.claude"
+CLAUDE_BACKUP="${HOME}/.claude-setup-backups/$(date +%Y%m%d-%H%M%S)"
 
-link_if_absent() {
-    if [ -e "$2" ] || [ -L "$2" ]; then
-        echo "skip: $2 already exists"
-    else
-        ln -s "$1" "$2"
+confirm_replace() {
+    local answer relative
+    read -r -p "Replace local $1 with the repo version? [y/N] " answer
+    case "${answer}" in
+        [yY] | [yY][eE][sS]) ;;
+        *)
+            echo "kept: $1"
+            return 1
+            ;;
+    esac
+    relative="${1#"${CLAUDE_HOME}"/}"
+    mkdir -p "$(dirname "${CLAUDE_BACKUP}/${relative}")"
+    mv "$1" "${CLAUDE_BACKUP}/${relative}"
+    echo "backed up: $1 -> ${CLAUDE_BACKUP}/${relative}"
+}
+
+link_item() {
+    if [ -L "$2" ] && [ "$(readlink "$2")" = "$1" ]; then
+        return 0
     fi
+    if [ -e "$2" ] || [ -L "$2" ]; then
+        confirm_replace "$2" || return 0
+    fi
+    ln -s "$1" "$2"
 }
 
 for dir in skills hooks commands workflows status-lines themes agents rules output-styles; do
     mkdir -p "${CLAUDE_HOME}/${dir}"
     for item in "${CLAUDE_SOURCE}/${dir}"/*; do
         [ -e "${item}" ] || continue
-        link_if_absent "${item}" "${CLAUDE_HOME}/${dir}/$(basename "${item}")"
+        link_item "${item}" "${CLAUDE_HOME}/${dir}/$(basename "${item}")"
     done
 done
-link_if_absent "${CLAUDE_SOURCE}/CLAUDE.md" "${CLAUDE_HOME}/CLAUDE.md"
+link_item "${CLAUDE_SOURCE}/CLAUDE.md" "${CLAUDE_HOME}/CLAUDE.md"
 # Claude Code rewrites settings.json, so copy it instead of linking it.
 if ! [ -e "${CLAUDE_HOME}/settings.json" ]; then
     cp "${CLAUDE_SOURCE}/settings.json" "${CLAUDE_HOME}/settings.json"
+elif ! cmp -s "${CLAUDE_SOURCE}/settings.json" "${CLAUDE_HOME}/settings.json"; then
+    confirm_replace "${CLAUDE_HOME}/settings.json" &&
+        cp "${CLAUDE_SOURCE}/settings.json" "${CLAUDE_HOME}/settings.json"
 fi
 
 # Setup bash
