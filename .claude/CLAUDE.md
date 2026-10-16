@@ -112,7 +112,7 @@ mbond/pe-1234/fix-login-redirect/2  ticket + 2nd PR of the feature
 
 * When working with git ops like commits and comments, never attribute to claude or other agentic tooling.
 * Open PRs as drafts (`--draft`), never as ready-for-review
-* Target the default branch, don't rely on `gh`'s implicit base
+* Target the default branch for a single PR or the first PR of a stack. Each later PR in a stack targets the branch of the PR before it. Always pass `--base` explicitly; don't rely on `gh`'s implicit base.
 * Use conventional commit messages: `type(scope): description` or `type(scope): [TICKET-ID] description`
 * Commit subjects and PR titles: target 50 characters or fewer, hard cap 60
 * In PR descriptions do not list the number of tests that have passed, as the number of tests could be off and result in a blocking comment to fix the description
