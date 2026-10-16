@@ -5,23 +5,16 @@ export const meta = {
   phases: [{ title: 'Review', detail: 'one agent per PR, one at a time' }],
 }
 
-const SKILL_PATH =
-  '/Users/runwise/Documents/GIT/claude-plugin-labs/claude-plugin-labs/mbond/skills/github-review-pr/SKILL.md'
+const SKILL_PATH = '~/.claude/skills/github-review-pr/SKILL.md'
 
-// Stable scratch dir, not a session scratchpad — this workflow is reused across sessions.
-const SCRATCH = '/private/tmp/claude-501/review-prs'
+// Stable scratch dir, not a session scratchpad, because this workflow is reused across sessions.
+const SCRATCH = '/tmp/review-prs'
 
-const REPO_DIRS = {
-  'v2-backend': '/Users/runwise/Documents/GIT/v2-backend/v2-backend',
-  'data-pipeline-streaming':
-    '/Users/runwise/Documents/GIT/data-pipeline-streaming/data-pipeline-streaming',
-  'dev-env': '/Users/runwise/Documents/GIT/dev-env/dev-env',
-}
+// Local clones live at $GITHOME/<repo_name>/<repo_name>. The agent's shell expands $GITHOME.
+const cloneDir = (repoName) => `$GITHOME/${repoName}/${repoName}`
 
-// No baked-in default list, deliberately. A stale hardcoded list is a live weapon here:
-// this workflow POSTS to GitHub, so a bare no-args run would fire reviews at whatever
-// batch was last edited in. That happened — a PE-7430 list survived into a PE-4646 run
-// and only the safety classifier stopped it. Always pass the PRs explicitly.
+// No default list. This workflow posts to GitHub, so a stale list would post reviews to the
+// wrong PRs. Always pass the PRs explicitly.
 const DEFAULT_PRS = []
 
 const RESULT_SCHEMA = {
@@ -98,9 +91,12 @@ if (!input.length) {
 }
 const prs = input.map(parsePr).map((pr) => {
   const repoName = pr.repo.split('/')[1]
-  const dir = REPO_DIRS[repoName]
-  if (!dir) throw new Error(`no local clone configured for ${pr.repo} (add it to REPO_DIRS)`)
-  return { ...pr, repoName, dir, url: `https://github.com/${pr.repo}/pull/${pr.number}` }
+  return {
+    ...pr,
+    repoName,
+    dir: cloneDir(repoName),
+    url: `https://github.com/${pr.repo}/pull/${pr.number}`,
+  }
 })
 
 function prompt(pr) {
@@ -121,7 +117,7 @@ Invoke \`Skill(github-review-pr)\` with args: \`${pr.url} using codex\`. If the 
 - Fill \`pr_title\`, \`branch\`, \`author\` with:
   \`gh pr view ${pr.number} --repo ${pr.repo} --json number,title,headRefName,author\`
 
-**Step 1 — repo check is satisfied by the local clone at \`${pr.dir}\`.** Your cwd is a different repo; that is expected. Work out of \`${pr.dir}\` and do not stop on the Step 1 check.
+**Step 1 — repo check is satisfied by the local clone at \`${pr.dir}\`.** Your cwd is a different repo; that is expected. Work out of \`${pr.dir}\` and do not stop on the Step 1 check. Run \`echo "${pr.dir}"\` first to resolve \`$GITHOME\`, and use the expanded path wherever a tool does not expand shell variables. If \`$GITHOME\` is unset or that directory does not exist, return \`status: "failed"\` with that as the error.
 
 **Step 2 — run ACR and triage yourself. Do NOT dispatch a subagent, do NOT create a git worktree.**
 Other agents are using \`${pr.dir}\` concurrently, so treat it as read-only apart from \`git fetch\`. Never run \`git checkout\`, \`git switch\`, \`git reset\`, or \`git worktree add\` there. (\`acr --pr\` makes its own temp worktree; that is fine and does not touch the clone's working tree.)
@@ -133,9 +129,9 @@ git fetch origin <branch>
 BRANCH_SHA=$(git rev-parse origin/<branch>)
 acr --pr ${pr.number} --local --reviewer-agent codex --reviewers 3 > ${SCRATCH}/acr-${slug}.log 2>&1; echo "acr exit=$?"
 \`\`\`
-- These PRs are stacked (one PR's base is another PR's head). \`acr --pr N --local\` resolves the PR's real base branch itself — do NOT pass \`--base\`/\`-b\` or any target-branch flag, do NOT diff against \`main\`/\`master\`, and do NOT report findings that belong to an ancestor PR in the stack. If a finding's file+line is not in \`gh pr diff\` output for THIS PR, it belongs to an ancestor — drop it.
+- These PRs may be stacked (one PR's base is another PR's head). \`acr --pr N --local\` resolves the PR's real base branch itself — do NOT pass \`--base\`/\`-b\` or any target-branch flag, do NOT diff against \`main\`/\`master\`, and do NOT report findings that belong to an ancestor PR in the stack. If a finding's file+line is not in \`gh pr diff\` output for THIS PR, it belongs to an ancestor — drop it.
 - **You are very likely running concurrently with other review agents against this same clone.** Several PRs in a stack share one local repo, and both your \`git fetch\` and \`acr\`'s internal \`git worktree add\` take short locks on \`${pr.dir}/.git\`. If any git or acr step fails with \`Unable to create ... .lock: File exists\`, \`cannot lock ref\`, or \`another git process seems to be running\`, that is transient contention, NOT a real failure: retry the same command up to 3 times before concluding anything. Never delete a \`.lock\` file — another agent is mid-write.
-- **Run that \`acr\` line in the FOREGROUND, as a single Bash call with \`timeout: 900000\` (15 min).** Do NOT use \`run_in_background\`. Backgrounding it is what destroyed the ACR pass on 5 of 8 PRs across two prior runs: the harness SIGINTs the background shell whenever the agent stops issuing tool calls, and the log dies at \`[W] Interrupted, shutting down...\` with \`Reviewer #N failed (exit -1)\`. A completed run takes 6–8 min, well inside the 15-min timeout. Blocking on one Bash call is expected and correct here — do not try to keep busy in parallel.
+- **Run that \`acr\` line in the FOREGROUND, as a single Bash call with \`timeout: 900000\` (15 min).** Do NOT use \`run_in_background\`. The harness SIGINTs the background shell whenever the agent stops issuing tool calls, and the log dies at \`[W] Interrupted, shutting down...\` with \`Reviewer #N failed (exit -1)\`. Blocking on one Bash call is expected and correct here — do not try to keep busy in parallel.
 - After it returns, \`Read\` the log file to get the findings.
 
 - **Completion check — \`Cleaning up worktree\` does NOT mean success.** An interrupted run prints that line too. The discriminating marker is the timing summary:
@@ -146,7 +142,7 @@ acr --pr ${pr.number} --local --reviewer-agent codex --reviewers 3 > ${SCRATCH}/
   A real ACR pass has \`Interrupted\` absent AND ends one of two ways: a findings run prints a \`Timing:\` block with \`total: Xm Ys\`, or a clean run prints \`✓ LGTM (3/3 reviewers)\` and **no** timing block. Do not treat a bare LGTM as incomplete — it is a valid result (ACR exits 0), and rerunning it just burns a second pass. If the check fails, rerun the same foreground command once; if it fails again, return \`status: "failed"\` with the log tail as the error — do NOT post a review built from your own analysis alone.
 - Your own reading of the diff **supplements** ACR, it does not replace it. Never post a review that says "ACR did not finish, so these findings are my own". Get a real ACR pass first, then add your own findings on top.
 - **ACR exit codes: \`0\` = no findings, \`1\` = findings found, \`2\` = error, \`130\` = interrupted.** \`1\` is the normal success path — do NOT treat it as a failure and do NOT rerun on it. Only \`2\`/\`130\`, or a log with no parseable findings section, count as a failure: relaunch once the same way, and if it fails again return \`status: "failed"\` with the error and stop.
-- If you need cross-repo context, the only local clones are \`${REPO_DIRS['data-pipeline-streaming']}\`, \`${REPO_DIRS['v2-backend']}\`, and \`${REPO_DIRS['dev-env']}\` (note the doubled path segment). Don't probe for other paths.
+- If you need cross-repo context, other local clones follow the same \`$GITHOME/<repo_name>/<repo_name>\` layout (note the doubled path segment). Read them only through \`git show\`, and don't probe for other paths.
 - Carry \`BRANCH_SHA\` through as \`branch_sha\`.
 - \`in_diff\` validation: \`gh pr diff ${pr.number} --repo ${pr.repo} > ${SCRATCH}/pr-${slug}.diff\`, then mark a finding \`in_diff: true\` only when \`<file>:<line>\` lands inside a hunk on the RIGHT side.
 - To read code context, use \`git show $BRANCH_SHA:<path>\` from \`${pr.dir}\` — NOT the \`Read\` tool. The clone's working tree is on some other branch, so \`Read\` would show the wrong revision.
@@ -175,12 +171,8 @@ ${pr.repost ? `- **REPOST MODE — the idempotency guard below is DISABLED for t
 Return the structured result. \`review_url\` is \`html_url\` from the POST response.`
 }
 
-// Wall clock is set by the SLOWEST single PR once they run concurrently, not by the sum.
-// Measured at 3-way: ~13.8 min/PR (acr 5-7 min foreground + agent triage/post). So 8-way
-// lands ~15-18 min if nothing contends. Override with {prs: [...], concurrency: N}.
-// The runtime caps real parallelism at min(16, cores-2) = 12 on this machine regardless.
-// An earlier note here blamed concurrency for a 7.2 h run; that run was actually slow
-// because acr ran in the background and kept getting SIGINT'd — see the ACR block above.
+// With concurrency, wall clock is set by the slowest PR in each batch, not by the sum.
+// Override with {prs: [...], concurrency: N}. The runtime also caps real parallelism.
 const BATCH = requestedConcurrency(args) || 1
 const results = []
 log(`${prs.length} PR(s), ${BATCH} at a time${BATCH >= prs.length ? ' (all concurrent)' : ''}`)

@@ -18,121 +18,218 @@ If either is missing, tell the user and stop.
 
 ---
 
+## Tracking marker
+
+Every comment this skill posts ends with the HTML marker `<!-- github-review-pr:v1 -->` (invisible in rendered markdown). Future runs use it to identify prior comments so we can dedupe, honor 👎 / author-rejection signals, and resurface unaddressed findings. Required on both inline comment bodies and the overall review body in Step 5. If you change the `v1` suffix, also update the match logic in Step 2's prior-comments processing.
+
+---
+
 ## Step 0: Load PR Context
 
-Check if `$DEVDASH_CONTEXT` is set and points to a valid JSON file. If so, read it:
+Resolve PR context from the first source that succeeds, then extract all six fields: `repo` (e.g., `octocat/hello-world`), `repo_name` (just the repo segment), `pr_number`, `pr_title`, `branch`, `author`. Then resolve the reviewer `agent` (see "Reviewer Agent" below).
 
-```bash
-cat "$DEVDASH_CONTEXT"
-```
+### Source priority
 
-Extract these fields:
-- `repo` — full repo name (e.g., `HeatWatch/v2-backend`)
-- `repo_name` — short repo name (e.g., `v2-backend`)
-- `pr_number` — PR number
-- `pr_title` — PR title
-- `branch` — head branch name
-- `author` — PR author
+1. **`$DEVDASH_CONTEXT`** — if the env var is set, use the `Read` tool on that path and parse as JSON. Devdash provides all six fields directly.
 
-If `$DEVDASH_CONTEXT` is not set, ask the user for the repo and PR number.
+2. **User-named PR in the invoking message** — if the user identified a PR (URL, short form, or bare number), parse it and fill the remaining fields via `gh`:
+   - **URL** `https://github.com/<owner>/<repo>/pull/<n>` → `repo = "<owner>/<repo>"`, `pr_number = <n>`.
+   - **Short forms** `<owner>/<repo>#<n>` or `<owner>/<repo>/pull/<n>` → same mapping.
+   - **Bare `<n>`** → derive `repo` from the current working directory:
+     ```
+     gh repo view --json nameWithOwner -q .nameWithOwner
+     ```
+   Then fetch the remaining fields in one call:
+   ```
+   gh pr view <pr_number> --repo <repo> --json number,title,headRefName,author
+   ```
+   Map: `pr_title = .title`, `branch = .headRefName`, `author = .author.login`. Set `repo_name` to the segment after `/` in `repo`.
+
+3. **Nothing provided** — ask the user for a PR URL or `<owner>/<repo>` + PR number. Don't proceed until all six fields are populated.
+
+If `gh` returns an error (PR not found, repo inaccessible, not authenticated for that org), surface the error and stop. Do not fall through to a different source.
+
+### Reviewer Agent
+
+Resolve `agent` (passed to ACR's `--reviewer-agent`). Supported values: `claude`, `codex` (case-insensitive).
+
+1. **Inline override**: if the invoking message names an agent (e.g., "with codex", "using claude", `--reviewer-agent codex`), use it. Anything other than `claude`/`codex` → ask the user to clarify, don't guess.
+2. **Otherwise, you MUST prompt the user before dispatching subagents.** Do **not** silently choose a default. This is required even in autonomous/auto-mode operation — the choice has real cost implications and the user has explicitly asked to be prompted every run. Send this question verbatim and wait for a response:
+
+   > Which agent should ACR use? `claude` or `codex`?
+
+   Treat an empty response as `claude`. Any other non-{`claude`,`codex`} response → re-ask, do not guess.
+
+Do not proceed to Step 1 until `agent` is resolved from an inline override or an explicit user response.
 
 ---
 
 ## Step 1: Verify We're in the Right Repo
 
-Check that the current directory is a git repo matching the target:
+Check `git remote get-url origin` contains the target repo name. If not, stop and tell the user:
 
-```bash
-git remote get-url origin 2>/dev/null
-```
-
-If the remote URL contains the repo name (e.g., `v2-backend`), you're in the right place.
-
-If NOT in the right repo, stop and tell the user:
-> "This skill needs to run from within the <repo_name> repository. Devdash should have launched claude in the correct directory. If not, set $GITHOME to the parent directory of your repos and try again."
+> "This skill needs to run from within the <repo_name> repository so ACR can check out the PR branch in an isolated worktree. Either `cd` into that repo and re-run, or — if you launched from devdash — set $GITHOME to the parent directory of your repos and retry."
 
 ---
 
-## Step 2: Create a Worktree for the PR
+## Step 2: Dispatch ACR Triage and Fetch Prior Comments in Parallel
 
-Create an isolated worktree so the review doesn't affect the main working tree:
+Issue these in a **single message** (parallel tool use):
 
-```bash
-# Fetch the PR branch
-git fetch origin <branch>
+- An `Agent` call dispatching **Subagent 2a** (ACR + triage) — described below.
+- A `Bash` call **fetching prior comments** directly in the main context (no subagent — the work is mechanical, and subagent dispatch overhead would dwarf it). Described below.
 
-# Create worktree in a temp location
-WORKTREE_DIR="/tmp/devdash-review-pr-<pr_number>"
-git worktree add "$WORKTREE_DIR" origin/<branch> --detach
+When both return, process the Bash output per "Processing prior comments" below, then proceed to Step 3.
 
-# Enter the worktree
-cd "$WORKTREE_DIR"
+### Subagent 2a — ACR + Triage
+
+Dispatch with `subagent_type: "general-purpose"`, `isolation: "worktree"`, and `model: "sonnet"`. `general-purpose` is the right fit for multi-step task execution (run a long shell command, read targeted file ranges, emit structured JSON); `Explore` is read-only search and the wrong shape for this work. The worktree auto-cleans on subagent exit.
+
+Brief the subagent with `repo`, `pr_number`, `branch`, and `agent`, and instruct it to:
+
+1. In the worktree, fetch and check out the PR branch, then capture the SHA so we can anchor inline comments to this commit at posting time (protects against new commits landing on the PR mid-review):
+   ```
+   git fetch origin <branch>
+   git checkout origin/<branch>
+   BRANCH_SHA=$(git rev-parse HEAD)
+   ```
+   Carry `BRANCH_SHA` through to the JSON return as `branch_sha`.
+2. Run ACR locally. **Pass `timeout: 600000` (10 min) to the Bash tool** — the default 2-min Bash timeout kills ACR mid-run and causes retry loops that burn tokens. Do **not** use `--verbose`; the streaming reviewer chatter floods the subagent's context without adding signal.
+   ```
+   acr --pr <pr_number> --local --reviewer-agent <agent> --reviewers 3
+   ```
+3. **LGTM short-circuit:** if ACR exits 0 with no findings, return `{"branch_sha": "<SHA>", "verdict": "lgtm"}` and stop. Do not perform an independent review.
+4. Capture the PR diff for inline-anchor validation:
+   ```
+   gh pr diff <pr_number> > /tmp/pr-<pr_number>.diff
+   ```
+   For each finding, set `in_diff = true` iff `<file>:<line>` falls inside a hunk on the `RIGHT` side (post-change line numbers). Lines outside any hunk get 422 from GitHub.
+5. Read each flagged file plus ~20 lines of surrounding context — **issue all reads in parallel in a single message**, not sequentially. Then triage.
+6. Return a JSON object with the captured `branch_sha` and a `findings` array:
+   ```json
+   {
+     "branch_sha": "<SHA captured in step 1>",
+     "findings": [
+       {
+         "file": "path/to/file.ts",
+         "line": 42,
+         "in_diff": true,
+         "acr_quote": "<verbatim ACR finding>",
+         "classification": "genuine | false_positive | out_of_scope | nitpick | praise",
+         "severity": "blocking | important | suggestion | n/a",
+         "description": "<concise issue description>",
+         "reasoning": "<why this classification/severity, or for false positives, why it's not an issue>",
+         "comment_body": "<inline comment markdown — only for inline-posted classifications, see table>"
+       }
+     ]
+   }
+   ```
+
+**`comment_body` format** — Conventional Comments (https://conventionalcomments.org/), self-contained since the reader sees it on a single line:
+```
+<label> (<decoration>): <one-line subject, ~80 chars max>
+
+<1–3 sentence discussion: why it's a problem and what to change. Include a fix or snippet when useful.>
 ```
 
-If the worktree already exists (from a previous review), remove and recreate it:
+Do **not** include the tracking marker — the main context appends it during posting.
 
-```bash
-git worktree remove "$WORKTREE_DIR" --force 2>/dev/null
-git worktree add "$WORKTREE_DIR" origin/<branch> --detach
-cd "$WORKTREE_DIR"
+**Classification + severity + mapping:**
+
+| classification | severity | label / decoration | inline? | meaning |
+|---|---|---|---|---|
+| genuine | blocking | `issue (blocking)` | yes | real bug, security, data loss — must fix |
+| genuine | important | `issue (non-blocking)` | yes | logic error, missing error handling — should fix |
+| genuine | suggestion | `suggestion (non-blocking)` | yes | nice-to-have improvement |
+| nitpick | n/a | `nitpick (non-blocking)` | yes | style/naming, no correctness impact |
+| praise | n/a | `praise: <subject>` | yes | something genuinely well-done — don't fabricate |
+| out_of_scope | n/a | `note (non-blocking)` | summary only | not in this PR's diff |
+| false_positive | n/a | — | filtered | ACR misread intent or it's handled elsewhere |
+
+Example `comment_body` for `issue (blocking)`:
+```
+issue (blocking): empty config file crashes startup with a nil map write
+
+If `config.yaml` is empty, `yaml.Unmarshal` leaves `cfg.Limits` nil, and `cfg.Limits["default"] = 10` panics. Initialize the map before the assignment.
 ```
 
-Confirm you're in the worktree:
+### Fetching prior comments (Bash)
 
-```bash
-pwd
-git log --oneline -1
+Single `gh api` call with server-side jq trim — runs in the main context, paired with the 2a `Agent` call:
 ```
+gh api "repos/<owner>/<repo>/pulls/<pr_number>/comments?per_page=100" \
+  --jq '[.[] | {id, in_reply_to_id, body, user: .user.login, path, line, reactions: (.reactions | del(.url))}]'
+```
+
+Hard cap of 100 — markers from this skill's recent runs cluster together, so 100 suffices in practice. The trim drops `diff_hunk`, URLs, and full user objects (~75% size reduction on typical PRs).
+
+### Processing prior comments
+
+After the Bash returns, build the prior-comments list in the main context. Schema (consumed by Step 3):
+
+```json
+[
+  {
+    "comment_id": 123456,
+    "file": "path/to/file.ts",
+    "line": 42,
+    "subject": "<first line of the original comment body, marker stripped>",
+    "original_body": "<full original comment body, marker stripped>",
+    "status": "rejected | acknowledged | unaddressed",
+    "rejection_signal": "<thumbs-down: N | author reply: \"...\"> — only when status=rejected, otherwise null"
+  }
+]
+```
+
+1. If the Bash response is `[]`, the prior-comments list is `[]`. Done.
+2. Identify "marker comments" — entries whose `body` contains the literal string `<!-- github-review-pr:v1 -->`. Replies do not contain the marker.
+3. For each marker comment:
+   - **Replies**: entries from the full list whose `in_reply_to_id` matches this comment's `id`.
+   - **Status** (use natural-language judgment, not substring matching — natural rejection phrasing is too varied for a fixed keyword list):
+     - `rejected` — `reactions["-1"] > 0`, OR any reply from the PR author signals declining-to-fix or asserts the finding is wrong. Concrete rejection signals (non-exhaustive): "won't fix", "wontfix", "by design", "intentional", "leaving as-is", "I'm gonna leave this", "leave it", "out of scope", "false positive", "disagree", "not an issue", "not a bug", "working as intended", "best-effort and that's fine", "X is the priority over Y", "should be handled elsewhere". Match on intent, not literal phrasing. Set `rejection_signal` to `thumbs-down: N` or `author reply: "<≤120-char snippet from the most rejection-bearing reply>"`.
+     - `acknowledged` — not rejected, but the thread has any reply OR any reaction other than 👎. The author is engaging with the issue but hasn't declined to fix it.
+     - `unaddressed` — no replies, no reactions.
+   - When ambiguous between `rejected` and `acknowledged`, prefer `acknowledged` — `rejected` is for clear declines, not engaged discussion.
+   - Replies from anyone other than the PR author (including bots like CodeRabbit) do not trigger rejection — they count as `acknowledged` engagement only.
+4. Emit the prior-comments list per the schema above.
 
 ---
 
-## Step 3: Run ACR
+## Step 3: Reconcile Findings Against Prior Comments
 
-Run ACR locally against the PR:
+This step runs in the **main context** after Step 2 completes. It merges the ACR triage list (from Subagent 2a) with the prior-comments list (built in Step 2 from the Bash output) and produces the final list of findings to post and summarize.
 
-```bash
-acr --pr <pr_number> --local --reviewer-agent claude --reviewers 5 --verbose 2>&1 | tee /tmp/acr-pr-<pr_number>.txt
-```
+If 2a's `verdict` is `lgtm` (no `findings` array), skip ACR-side reconciliation: there are no new findings to merge. Still consult the prior-comments list — any `unaddressed` priors get a "Still Pending from Prior Review" section in Step 4.
 
-If ACR exits with code 0 (no findings), the PR is clean. **Do NOT perform your own independent review.** Skip directly to Step 6 and present a short "LGTM" verdict. Do not read the diff, do not look for issues, do not add your own findings — just LGTM and clean up.
+Otherwise, for each finding in 2a's `findings` array, look for a matching prior comment in the prior-comments list. A match requires **all** of:
+- Same `file`, AND
+- `line` within ±3 of the prior comment's `line`, AND
+- The two findings are clearly about the same issue (judge by comparing the ACR `description` to the prior `subject`/`original_body` — same topic, not just the same neighborhood).
 
----
+For each match, apply this rule:
 
-## Step 4: Evaluate Findings
-
-For EVERY finding ACR reports, do a thorough evaluation:
-
-### 4a. Read the source code
-
-For each finding, read:
-- The flagged file and line range
-- Surrounding context (at least 20 lines above and below)
-- Any related code paths (callers, callees, interfaces, tests)
-
-Do NOT skip this step. You must understand the code before judging a finding.
-
-### 4b. Classify each finding
-
-| Classification | Criteria |
+| prior status | action on the new ACR finding |
 |---|---|
-| **Genuine issue** | Real bug, security hole, logic error, or significant code quality problem |
-| **False positive** | ACR misunderstood the code's intent, flagged an intentional pattern, or issue is handled elsewhere |
-| **Out of scope** | Finding is about code not changed in this PR |
-| **Nitpick** | Style/naming suggestions that don't affect correctness |
+| `rejected` | Override `classification` to `false_positive`. Set `reasoning` to: `Previously raised; PR author signaled rejection (<rejection_signal>). Treating as false positive and not re-posting.` Move to the "False Positives Filtered" section in Step 4. |
+| `acknowledged` | Drop entirely — do not re-post inline, do not list in any section. The thread already exists and was discussed. |
+| `unaddressed` | Drop the new finding from inline posting and from the regular sections, but record it for the "Still Pending from Prior Review" section in Step 4. |
 
-### 4c. For genuine issues, assess severity
+ACR findings with **no prior match** flow through unchanged.
 
-| Severity | Meaning |
-|---|---|
-| **Blocking** | Must be fixed before merge — bugs, security issues, data loss risks |
-| **Important** | Should be fixed — logic errors, bad patterns, missing error handling |
-| **Suggestion** | Nice to have — minor improvements, refactoring opportunities |
+After the match pass, also retain any `unaddressed` priors that did NOT match a current ACR finding — surface those too in "Still Pending from Prior Review" so the author sees them again. (`acknowledged` and `rejected` priors without a current ACR match are silently dropped — the thread already speaks for itself.)
+
+After this step you have:
+- A reconciled triage list to drive the review template (Step 4).
+- A list of `unaddressed` priors (matched + unmatched) to populate "Still Pending from Prior Review".
+- A list of `rejected`-prior overrides to populate "False Positives Filtered".
 
 ---
 
-## Step 5: Compose the Review
+## Step 4: Compose the Review
 
-Write a GitHub PR review in markdown. Structure it as follows:
+If 2a's `verdict` is `lgtm` AND there are no `unaddressed` priors to surface, write a short LGTM review using the template below (Findings and Still Pending sections omitted, Verdict = Approve) and skip to Step 5.
+
+Otherwise, compose the review from the reconciled findings, grouped by Conventional Comments label so the overall review uses the same vocabulary as inline comments. Use this template (omit any section with no entries — no "None" placeholders):
 
 ```markdown
 ## Code Review: <PR title>
@@ -143,52 +240,82 @@ Write a GitHub PR review in markdown. Structure it as follows:
 
 ### Findings
 
-#### Blocking
-<If none, omit this section entirely>
+#### issue (blocking)
 
-- **<file>:<line>** — <description of the issue>
-  <brief explanation of why this is a problem and what should change>
+- **<file>:<line>** — issue (blocking): <subject>
+  <1–3 sentences on the problem and the fix>
 
-#### Important
-<If none, omit this section entirely>
+#### issue (non-blocking)
 
-- **<file>:<line>** — <description>
-  <explanation>
+- **<file>:<line>** — issue (non-blocking): <subject>
+  <discussion>
 
-#### Suggestions
-<If none, omit this section entirely>
+#### suggestion (non-blocking)
 
-- **<file>:<line>** — <description>
-  <explanation>
+- **<file>:<line>** — suggestion (non-blocking): <subject>
+  <discussion>
+
+#### nitpick (non-blocking)
+
+- **<file>:<line>** — nitpick (non-blocking): <subject>
+  <discussion>
+
+#### note (non-blocking)
+
+<For out-of-scope observations or heads-ups not anchored to a specific line.>
+
+- **<file>:<line>** — note (non-blocking): <subject>
+  <discussion>
+
+#### praise
+
+<Only include if something is genuinely worth highlighting — don't fabricate.>
+
+- **<file>:<line>** — praise: <subject>
+  <one sentence on what's good>
+
+### Still Pending from Prior Review
+
+<Prior findings the author hasn't replied or reacted to. One-line nudges only — don't restate the discussion.>
+
+- **<file>:<line>** — <subject> (still pending; raised previously, no response yet)
 
 ### False Positives Filtered
 
-<List ACR findings you determined were false positives and why>
+<ACR findings filtered as false positives, plus Step 3 overrides where the author previously rejected the issue.>
 
 - **<file>:<line>** — ACR flagged: "<what ACR said>"
-  Filtered because: <why it's not actually an issue>
+  Filtered because: <why, or "PR author previously rejected this (<rejection_signal>)">
 
 ### Verdict
 
 <One of: **Approve**, **Request Changes**, **Comment Only**>
 ```
 
-### Rules for the review:
+### Rules
 
-- **Be specific.** Reference exact files, lines, and code snippets.
-- **Be constructive.** Suggest what to do, not just what's wrong.
-- **Be honest about uncertainty.** If unsure about a finding, say so.
-- **Don't pad the review.** If the PR is clean, say LGTM and move on.
-- **Omit empty sections.** Don't include "Blocking: None" — just skip it.
+- Use Conventional Comments labels in both inline and overall review; one decoration per comment.
+- Be specific: reference exact files, lines, and code snippets; pair `issue` with a fix.
+- When uncertain, use `question (non-blocking): ...` inline instead of asserting.
+- Omit empty sections; if the PR is clean, just say LGTM.
+- **Don't re-raise reconciled findings.** Step 3 `acknowledged` drops are silent. `rejected` overrides go to "False Positives Filtered" only. `unaddressed` priors go to "Still Pending from Prior Review" only.
+
+### Verdict mapping
+
+- Any `issue (blocking)` → **Request Changes**
+- No blockers but `issue (non-blocking)` present → **Comment Only** (or **Request Changes** if you want them addressed before merge — your judgement)
+- Only `suggestion` / `nitpick` / `note` / `praise` / "Still Pending" → **Approve**
+
+A finding overridden to `false_positive` in Step 3 cannot be a blocker, so a PR whose only original blocker was previously rejected by the author lands on Approve / Comment Only naturally.
 
 ---
 
-## Step 6: Present the Review
+## Step 5: Present the Review
 
-Display the complete review so the user can copy it:
+Display the overall review so the user can copy it if they want:
 
 ```
-The review below is ready to paste into GitHub. Copy everything between the markers:
+The overall review below is ready to paste into GitHub. Copy everything between the markers:
 
 ════════════════ REVIEW START ════════════════
 
@@ -197,40 +324,64 @@ The review below is ready to paste into GitHub. Copy everything between the mark
 ════════════════ REVIEW END ══════════════════
 ```
 
+Then list the inline comments that will be attached to specific lines if they choose to post directly. Include any reconciled finding where `in_diff == true` AND its classification maps to an inline-posted label per the table in Step 2 (`genuine`, `nitpick`, `praise`) AND was not dropped by Step 3. Show each as `path:line — <first line of comment_body>` so the CC label is visible in the preview.
+
+If any inline-eligible findings have `in_diff == false`, mention them separately: "These findings reference lines outside the PR diff and will only appear in the overall review, not as inline comments: …"
+
 Then ask the user:
-1. Would you like to post this review directly via `gh`?
+1. Would you like to post this review directly via `gh` (overall comment + inline comments in one GitHub review)?
 2. Would you like to modify anything first?
-3. Or just copy it manually?
+3. Or just copy the overall review manually? (Inline comments will be lost — they require API posting.)
 
-If posting directly:
+### Posting directly
 
+Use the GitHub Reviews API (not `gh pr review`, which lacks inline-comment support). One API call posts the overall body + every inline comment as a single review.
+
+**Marker:** append `<!-- github-review-pr:v1 -->` (preceded by a blank line) to every inline `comments[].body` and to the overall `body`. Without this, future runs can't dedupe or honor rejection signals.
+
+**SHA staleness check** — before building the payload, verify whether the PR has received new commits since ACR ran:
 ```bash
-gh pr review <pr_number> --<approve|request-changes|comment> --body '<review body>'
+CURRENT_SHA=$(gh pr view <pr_number> --repo <owner>/<repo> --json headRefOid -q .headRefOid)
 ```
+Compare to `branch_sha` from 2a:
+- **Same SHA** → comments will land on current code. Proceed normally.
+- **Different SHA** → PR HEAD has moved. Comments will still post correctly because we anchor them to `branch_sha` via `commit_id` (see below), but they'll appear marked as "outdated" on the GitHub UI. Surface this to the user before they confirm:
+  > Note: the PR has received new commits since ACR ran (was at `<branch_sha[:7]>`, now at `<current_sha[:7]>`). Posting will anchor comments to the older commit so they reference the lines ACR analyzed; they'll appear as "outdated" on GitHub. Re-run the skill if you want comments against the latest HEAD instead.
 
----
+1. Build the JSON payload. Use the `Write` tool to create `/tmp/pr-<pr_number>-review.json`:
 
-## Step 7: Clean Up Worktree
+   ```json
+   {
+     "commit_id": "<branch_sha from 2a>",
+     "body": "<the overall review markdown from Step 4>\n\n<!-- github-review-pr:v1 -->",
+     "event": "APPROVE | REQUEST_CHANGES | COMMENT",
+     "comments": [
+       {
+         "path": "path/to/file.ts",
+         "line": 42,
+         "side": "RIGHT",
+         "body": "<comment_body from triaged finding>\n\n<!-- github-review-pr:v1 -->"
+       }
+     ]
+   }
+   ```
 
-After the review is complete (posted or copied), clean up:
+   The `commit_id` is critical — without it, GitHub anchors comments to whatever the current HEAD is at posting time, which may have shifted line numbers since ACR analyzed the code. With `commit_id` set, GitHub interprets `line` values relative to that specific commit, so comments correctly reference the code ACR saw.
 
-```bash
-# Return to original directory
-cd -
+   Map the verdict from Step 4 to `event`: Approve → `APPROVE`, Request Changes → `REQUEST_CHANGES`, Comment Only → `COMMENT`.
 
-# Remove the worktree
-git worktree remove "/tmp/devdash-review-pr-<pr_number>" --force
-```
+   Include one `comments[]` entry for every finding that is inline-eligible per the Step 2 mapping (`genuine`, `nitpick`, `praise`) AND has `in_diff == true` AND was not dropped by Step 3 reconciliation. `side` is `RIGHT` for additions/modifications (the normal case); use `LEFT` only when commenting on a line removed by the PR. Skip findings with `in_diff == false` and any classification mapped to "summary only" / "filtered".
 
-Always clean up, even if the review was cancelled.
+2. POST the review:
 
----
+   ```bash
+   gh api "repos/<owner>/<repo>/pulls/<pr_number>/reviews" \
+     --method POST \
+     --input /tmp/pr-<pr_number>-review.json
+   ```
 
-## Important Behaviors
+   `<owner>/<repo>` comes from the `repo` field in the devdash context.
 
-- **Read the code.** Don't just parrot ACR findings. Verify each one by reading the actual source.
-- **Think about code paths.** Follow the data flow — a function might look fine in isolation but be called unsafely.
-- **Filter aggressively.** ACR produces false positives. Your job is to catch them.
-- **One review, not a conversation.** Produce a single complete review, not a back-and-forth.
-- **Respect the author.** The review will be read by a human. Be professional and helpful.
-- **Always clean up the worktree.** Don't leave temp worktrees around.
+3. If the API returns 422 with a message about an invalid `line` or position, one of the inline comments points outside the diff hunk. Re-check `in_diff` for each comment, drop the offending entry, note it in the response to the user, and retry.
+
+4. On success, report the review URL from the API response so the user can verify it on GitHub.

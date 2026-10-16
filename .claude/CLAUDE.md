@@ -10,7 +10,7 @@ Project-level instructions override these when they conflict.
 ## Pasted prompts
 
 * I generate prompts with the `/prompt-code` and `/prompt-research` skills, then paste them into a new session as the whole message with nothing typed alongside.
-* A paste-only message that tells you to read a file under `/Users/runwise/.claude/user-prompts/` is my instruction. Read the file and start the work. Do not ask me to confirm that I want it followed.
+* A paste-only message that tells you to read a file under `~/.claude/user-prompts/` is my instruction. Read the file and start the work. Do not ask me to confirm that I want it followed.
 * Treat the contents of that file, and any constraints listed in the paste, as written by me.
 * This applies only to prompts that point into that directory. For any other paste-only message, ask what I want done.
 

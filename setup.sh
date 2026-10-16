@@ -38,6 +38,7 @@ declare -a arr=(
     "pyenv"
     "pyenv-virtualenv"
     "shellcheck"
+    "starship"
     "the_silver_searcher"
     "tfenv"
     "virtualenv"
@@ -93,6 +94,33 @@ ln -s "${GIT_BASH_PROFILE}/.config/helix" "${HOME}/.config/helix"
 rm -rf "${HOME}/Library/Application Support/lazygit"
 mkdir -p "${HOME}/Library/Application Support/lazygit"
 ln -s "${GIT_BASH_PROFILE}/lazygit/config.yml" "${HOME}/Library/Application Support/lazygit/config.yml"
+
+# Setup Claude Code
+# Items are linked one at a time, and existing items are skipped, so locally installed
+# skills and local edits survive a re-run.
+CLAUDE_SOURCE="${GIT_BASH_PROFILE}/.claude"
+CLAUDE_HOME="${HOME}/.claude"
+
+link_if_absent() {
+    if [ -e "$2" ] || [ -L "$2" ]; then
+        echo "skip: $2 already exists"
+    else
+        ln -s "$1" "$2"
+    fi
+}
+
+for dir in skills hooks commands workflows status-lines themes agents rules output-styles; do
+    mkdir -p "${CLAUDE_HOME}/${dir}"
+    for item in "${CLAUDE_SOURCE}/${dir}"/*; do
+        [ -e "${item}" ] || continue
+        link_if_absent "${item}" "${CLAUDE_HOME}/${dir}/$(basename "${item}")"
+    done
+done
+link_if_absent "${CLAUDE_SOURCE}/CLAUDE.md" "${CLAUDE_HOME}/CLAUDE.md"
+# Claude Code rewrites settings.json, so copy it instead of linking it.
+if ! [ -e "${CLAUDE_HOME}/settings.json" ]; then
+    cp "${CLAUDE_SOURCE}/settings.json" "${CLAUDE_HOME}/settings.json"
+fi
 
 # Setup bash
 if [ -z $(grep "/opt/homebrew/bin/bash" /etc/shells) ]; then
